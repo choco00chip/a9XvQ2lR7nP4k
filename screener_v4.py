@@ -466,7 +466,7 @@ def save_html(json_data):
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Stock Screener — oratnek</title>
+<title>Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
@@ -862,6 +862,6 @@ def main():
     save_html(json_data)
 
     print(f"\n✅ 完了 | 候補{len(candidates)}銘柄 / ユニバース{len(universe)}銘柄")
-    print(f"   🌐 アプリURL: https://choco00chip.github.io/stock-screener-choco/\n")
+    print(f"   🌐 アプリURL: https://choco00chip.github.io/a9XvQ2lR7nP4k/\n")
 if __name__ == "__main__":
     main()
