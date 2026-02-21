@@ -13,6 +13,8 @@ import numpy as np
 import json
 import time
 import warnings
+import requests as req_lib
+from io import StringIO
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -98,40 +100,21 @@ SP500_FALLBACK = [
 import requests as req_lib
 
 def fetch_sp500():
-    """S&P500銘柄リスト取得（3段階フォールバック）"""
-
-    # 方法1: requests + User-Agent偽装
+    """S&P500銘柄リスト取得（複数フォールバック）"""
+    # 方法1: requests + User-Agent
     try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-            "Accept": "text/html,application/xhtml+xml",
-        }
-        resp = req_lib.get(
-            "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
-            headers=headers, timeout=30
-        )
+        headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
+        resp = req_lib.get("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
+                           headers=headers, timeout=30)
         tables = pd.read_html(resp.text)
         tickers = [t.replace(".", "-") for t in tables[0]["Symbol"].tolist()]
         if len(tickers) > 400:
-            print(f"  S&P500 (Wikipedia): {len(tickers)}銘柄")
+            print(f"  S&P500: {len(tickers)}銘柄")
             return tickers
     except Exception as e:
-        print(f"  Wikipedia方法1失敗: {e}")
+        print(f"  S&P500取得失敗: {e}")
 
-    # 方法2: pandas直接
-    try:
-        tables = pd.read_html(
-            "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
-            storage_options={"User-Agent": "Mozilla/5.0"}
-        )
-        tickers = [t.replace(".", "-") for t in tables[0]["Symbol"].tolist()]
-        if len(tickers) > 400:
-            print(f"  S&P500 (pandas): {len(tickers)}銘柄")
-            return tickers
-    except Exception as e:
-        print(f"  Wikipedia方法2失敗: {e}")
-
-    # 方法3: ハードコードリスト（最終手段）
+    # 方法2: ハードコードリスト（最終手段）
     tickers = list(set(SP500_FALLBACK))
     print(f"  S&P500 (ハードコード): {len(tickers)}銘柄")
     return tickers
@@ -140,10 +123,7 @@ def fetch_nasdaq100():
     """NASDAQ100銘柄リスト取得"""
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
-        resp = req_lib.get(
-            "https://en.wikipedia.org/wiki/Nasdaq-100",
-            headers=headers, timeout=30
-        )
+        resp = req_lib.get("https://en.wikipedia.org/wiki/Nasdaq-100", headers=headers, timeout=30)
         tables = pd.read_html(resp.text)
         for t in tables:
             if "Ticker" in t.columns:
@@ -159,39 +139,22 @@ def fetch_russell2000():
     """Russell 2000銘柄リスト取得（iShares IWM ETF経由）"""
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
-        # iShares IWM の保有銘柄CSVを取得
         url = "https://www.ishares.com/us/products/239710/ishares-russell-2000-etf/1467271812596.ajax?tab=all&fileType=csv"
-        resp = req_lib.get(url, headers=headers, timeout=30)
-        from io import StringIO
-        # 最初の数行はメタデータなのでスキップ
+        resp = req_lib.get(url, headers=headers, timeout=60)
         lines = resp.text.split("\n")
         start = next(i for i, l in enumerate(lines) if "Ticker" in l or "ISIN" in l)
         df = pd.read_csv(StringIO("\n".join(lines[start:])))
         col = [c for c in df.columns if "Ticker" in c or "ticker" in c][0]
         tickers = df[col].dropna().tolist()
-        tickers = [t.strip().replace(".", "-") for t in tickers if isinstance(t, str) and len(t) <= 6 and t.strip().isalpha()]
+        tickers = [t.strip().replace(".", "-") for t in tickers
+                   if isinstance(t, str) and len(t.strip()) <= 6 and t.strip().replace("-","").isalpha()]
         if len(tickers) > 500:
             print(f"  Russell 2000: {len(tickers)}銘柄")
             return tickers
     except Exception as e:
         print(f"  iShares取得失敗: {e}")
 
-    # フォールバック: Wikipedia
-    try:
-        headers = {"User-Agent": "Mozilla/5.0"}
-        resp = req_lib.get("https://en.wikipedia.org/wiki/Russell_2000_Index", headers=headers, timeout=30)
-        tables = pd.read_html(resp.text)
-        for t in tables:
-            cols = [c for c in t.columns if "ticker" in str(c).lower() or "symbol" in str(c).lower()]
-            if cols and len(t) > 100:
-                tickers = t[cols[0]].dropna().tolist()
-                tickers = [str(t).strip().replace(".", "-") for t in tickers]
-                print(f"  Russell 2000 (Wikipedia): {len(tickers)}銘柄")
-                return tickers
-    except Exception as e:
-        print(f"  Wikipedia Russell 2000失敗: {e}")
-
-    print("  Russell 2000取得失敗 → S&P500のみ使用")
+    print("  Russell 2000取得失敗 → スキップ")
     return []
 
 def build_universe(mode="full"):
@@ -510,7 +473,7 @@ def save_html(json_data):
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Stock Screener — oratnek</title>
+<title>Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
@@ -886,6 +849,6 @@ def main():
     save_html(json_data)
 
     print(f"\n✅ 完了 | 候補{len(candidates)}銘柄 / ユニバース{len(universe)}銘柄")
-    print(f"   🌐 アプリURL: https://choco00chip.github.io/stock-screener-choco/\n")
+    print(f"   🌐 アプリURL: https://choco00chip.github.io/a9XvQ2lR7nP4k/\n")
 if __name__ == "__main__":
     main()
