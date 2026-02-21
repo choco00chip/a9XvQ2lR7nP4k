@@ -1,6 +1,6 @@
 {
-  "updated": "2026-02-21T16:10:02.580391+09:00",
-  "updated_jst": "2026-02-21 16:10 JST",
+  "updated": "2026-02-21T21:06:20.991918+09:00",
+  "updated_jst": "2026-02-21 21:06 JST",
   "universe_size": 503,
   "total_found": 239,
   "rs_formula": "percentrank(TICKER/SPY daily close, period) — TradingView準拠",

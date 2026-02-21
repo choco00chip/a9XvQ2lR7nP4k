@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Stock Screener — oratnek</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#060a10;color:#ddeeff;font-family:monospace;min-height:100vh}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:#1a2840;border-radius:2px}
+.row:hover{background:rgba(0,180,255,0.06)!important;cursor:pointer}
+input[type=range]{accent-color:#00e5ff;cursor:pointer;width:100%}
+button{cursor:pointer}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const RAW_DATA = {"updated": "2026-02-21T21:06:20.991918+09:00", "updated_jst": "2026-02-21 21:06 JST", "universe_size": 503, "total_found": 239, "rs_formula": "percentrank(TICKER/SPY daily close, period) — TradingView準拠", "rs_periods": {"p1": 5, "p2": 21, "p3": 63, "p4": 126}, "market": {"mode": "ハーフスロットル", "icon": "🟡", "vix": 19.09, "etfs": {"SPY": {"above": true, "rising": false, "close": 689.43, "ema21": 687.63}, "QQQ": {"above": false, "rising": false, "close": 608.81, "ema21": 611.19}, "IWM": {"above": true, "rising": true, "close": 264.61, "ema21": 262.71}}}, "stocks": [{"ticker": "EIX", "name": "Edison International", "sector": "Utilities", "industry": "Utilities - Regulated Electric", "market_cap_b": 28.4, "close": 73.74, "pct_high": 0.0, "stage2": 9, "ema21": 66.49, "sma50": 61.8, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 446.3, "rev": 30.8, "roe": 24.1, "margin": 23.1, "vcs": 104.2, "vol_shrink": false, "adr": 2.58, "score": 8, "stop": 68.58, "tp1": 81.11, "tp2": 88.49}, {"ticker": "FIX", "name": "Comfort Systems USA, Inc.", "sector": "Industrials", "industry": "Engineering & Construction", "market_cap_b": 51.6, "close": 1462.23, "pct_high": 0.0, "stage2": 9, "ema21": 1252.71, "sma50": 1100.48, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 129.5, "rev": 41.7, "roe": 49.2, "margin": 11.2, "vcs": 119.3, "vol_shrink": false, "adr": 5.11, "score": 8, "stop": 1359.87, "tp1": 1608.45, "tp2": 1754.68}, {"ticker": "GE", "name": "GE Aerospace", "sector": "Industrials", "industry": "Aerospace & Defense", "market_cap_b": 362.0, "close": 343.22, "pct_high": 0.0, "stage2": 9, "ema21": 318.4, "sma50": 311.38, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 37.4, "rev": 17.6, "roe": 44.7, "margin": 19.0, "vcs": 108.3, "vol_shrink": true, "adr": 2.98, "score": 8, "stop": 319.19, "tp1": 377.54, "tp2": 411.86}, {"ticker": "GLW", "name": "Corning Incorporated", "sector": "Technology", "industry": "Electronic Components", "market_cap_b": 119.7, "close": 139.51, "pct_high": 0.0, "stage2": 9, "ema21": 119.77, "sma50": 101.11, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 77.4, "rev": 20.4, "roe": 14.9, "margin": 10.2, "vcs": 169.1, "vol_shrink": true, "adr": 6.28, "score": 8, "stop": 129.74, "tp1": 153.46, "tp2": 167.41}, {"ticker": "JBL", "name": "Jabil Inc.", "sector": "Technology", "industry": "Electronic Components", "market_cap_b": 29.0, "close": 271.09, "pct_high": 0.0, "stage2": 9, "ema21": 252.57, "sma50": 239.57, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 53.4, "rev": 18.7, "roe": 47.8, "margin": 2.3, "vcs": 125.0, "vol_shrink": false, "adr": 4.29, "score": 8, "stop": 252.11, "tp1": 298.2, "tp2": 325.31}, {"ticker": "MNST", "name": "Monster Beverage Corporation", "sector": "Consumer Defensive", "industry": "Beverages - Non-Alcoholic", "market_cap_b": 81.8, "close": 83.76, "pct_high": 0.0, "stage2": 9, "ema21": 81.27, "sma50": 78.69, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 39.5, "rev": 16.8, "roe": 25.5, "margin": 21.7, "vcs": 94.5, "vol_shrink": false, "adr": 1.9, "score": 8, "stop": 77.9, "tp1": 92.14, "tp2": 100.51}, {"ticker": "TER", "name": "Teradyne, Inc.", "sector": "Technology", "industry": "Semiconductor Equipment & Materials", "market_cap_b": 51.7, "close": 324.85, "pct_high": 0.0, "stage2": 9, "ema21": 285.42, "sma50": 238.23, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 81.4, "rev": 43.9, "roe": 19.7, "margin": 17.4, "vcs": 141.0, "vol_shrink": true, "adr": 5.91, "score": 8, "stop": 302.11, "tp1": 357.34, "tp2": 389.82}, {"ticker": "TXT", "name": "Textron Inc.", "sector": "Industrials", "industry": "Aerospace & Defense", "market_cap_b": 17.6, "close": 100.77, "pct_high": 0.0, "stage2": 9, "ema21": 95.59, "sma50": 91.81, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 74.4, "rev": 15.6, "roe": 12.2, "margin": 6.2, "vcs": 103.0, "vol_shrink": true, "adr": 2.59, "score": 8, "stop": 93.72, "tp1": 110.85, "tp2": 120.92}, {"ticker": "HII", "name": "Huntington Ingalls Industries, ", "sector": "Industrials", "industry": "Aerospace & Defense", "market_cap_b": 17.2, "close": 437.57, "pct_high": -1.3, "stage2": 9, "ema21": 412.48, "sma50": 384.23, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 28.1, "rev": 15.7, "roe": 12.4, "margin": 4.8, "vcs": 158.2, "vol_shrink": true, "adr": 4.25, "score": 8, "stop": 406.94, "tp1": 481.33, "tp2": 525.08}, {"ticker": "LRCX", "name": "Lam Research Corporation", "sector": "Technology", "industry": "Semiconductor Equipment & Materials", "market_cap_b": 307.6, "close": 244.92, "pct_high": -1.3, "stage2": 9, "ema21": 229.09, "sma50": 206.24, "rs_p1": 100.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 37.0, "rev": 22.1, "roe": 65.6, "margin": 30.2, "vcs": 129.6, "vol_shrink": true, "adr": 5.23, "score": 8, "stop": 227.78, "tp1": 269.41, "tp2": 293.9}, {"ticker": "OKE", "name": "ONEOK, Inc.", "sector": "Energy", "industry": "Oil & Gas Midstream", "market_cap_b": 55.0, "close": 87.33, "pct_high": -9.9, "stage2": 8, "ema21": 81.89, "sma50": 76.04, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 26.2, "rev": 71.9, "roe": 17.8, "margin": 10.6, "vcs": 95.0, "vol_shrink": true, "adr": 2.64, "score": 8, "stop": 81.22, "tp1": 96.06, "tp2": 104.8}, {"ticker": "MU", "name": "Micron Technology, Inc.", "sector": "Technology", "industry": "Semiconductors", "market_cap_b": 481.9, "close": 428.17, "pct_high": -2.2, "stage2": 9, "ema21": 397.21, "sma50": 344.61, "rs_p1": 100.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 97.6, "rs_avg": 92.59, "eps": 175.4, "rev": 56.7, "roe": 22.6, "margin": 28.1, "vcs": 130.7, "vol_shrink": true, "adr": 6.56, "score": 8, "stop": 398.2, "tp1": 470.99, "tp2": 513.8}, {"ticker": "NVDA", "name": "NVIDIA Corporation", "sector": "Technology", "industry": "Semiconductors", "market_cap_b": 4621.5, "close": 189.82, "pct_high": -8.3, "stage2": 9, "ema21": 186.11, "sma50": 184.8, "rs_p1": 100.0, "rs_p2": 85.0, "rs_p3": 88.71, "rs_p4": 64.8, "rs_avg": 79.5, "eps": 66.7, "rev": 62.5, "roe": 107.4, "margin": 53.0, "vcs": 103.2, "vol_shrink": true, "adr": 3.21, "score": 8, "stop": 176.53, "tp1": 208.8, "tp2": 227.78}, {"ticker": "TEL", "name": "TE Connectivity plc", "sector": "Technology", "industry": "Electronic Components", "market_cap_b": 68.9, "close": 234.73, "pct_high": -5.7, "stage2": 9, "ema21": 229.16, "sma50": 230.2, "rs_p1": 25.0, "rs_p2": 85.0, "rs_p3": 72.58, "rs_p4": 69.6, "rs_avg": 75.73, "eps": 44.4, "rev": 21.7, "roe": 16.1, "margin": 11.4, "vcs": 144.5, "vol_shrink": true, "adr": 3.33, "score": 8, "stop": 218.3, "tp1": 258.2, "tp2": 281.68}, {"ticker": "APH", "name": "Amphenol Corporation", "sector": "Technology", "industry": "Electronic Components", "market_cap_b": 185.7, "close": 151.04, "pct_high": -9.1, "stage2": 9, "ema21": 145.77, "sma50": 142.31, "rs_p1": 75.0, "rs_p2": 80.0, "rs_p3": 87.1, "rs_p4": 93.6, "rs_avg": 86.9, "eps": 57.6, "rev": 49.1, "roe": 36.9, "margin": 18.5, "vcs": 150.8, "vol_shrink": true, "adr": 4.99, "score": 8, "stop": 140.47, "tp1": 166.14, "tp2": 181.25}, {"ticker": "ADI", "name": "Analog Devices, Inc.", "sector": "Technology", "industry": "Semiconductors", "market_cap_b": 173.8, "close": 355.03, "pct_high": 0.0, "stage2": 9, "ema21": 325.81, "sma50": 301.09, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 116.7, "rev": 30.4, "roe": 7.9, "margin": 23.0, "vcs": 112.4, "vol_shrink": false, "adr": 3.18, "score": 7, "stop": 330.18, "tp1": 390.53, "tp2": 426.04}, {"ticker": "GRMN", "name": "Garmin Ltd.", "sector": "Technology", "industry": "Scientific & Technical Instruments", "market_cap_b": 47.9, "close": 248.9, "pct_high": -3.8, "stage2": 7, "ema21": 215.84, "sma50": 208.63, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 72.0, "rs_avg": 90.67, "eps": 21.2, "rev": 16.6, "roe": 19.8, "margin": 23.0, "vcs": 161.8, "vol_shrink": false, "adr": 3.36, "score": 7, "stop": 231.48, "tp1": 273.79, "tp2": 298.68}, {"ticker": "CF", "name": "CF Industries Holdings, Inc.", "sector": "Basic Materials", "industry": "Agricultural Inputs", "market_cap_b": 15.7, "close": 97.18, "pct_high": -3.5, "stage2": 7, "ema21": 92.92, "sma50": 85.57, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 37.0, "rev": 22.8, "roe": 23.4, "margin": 20.5, "vcs": 129.4, "vol_shrink": false, "adr": 3.34, "score": 7, "stop": 90.38, "tp1": 106.9, "tp2": 116.62}, {"ticker": "FSLR", "name": "First Solar, Inc.", "sector": "Technology", "industry": "Solar", "market_cap_b": 26.0, "close": 241.88, "pct_high": -15.0, "stage2": 7, "ema21": 234.14, "sma50": 246.83, "rs_p1": 100.0, "rs_p2": 90.0, "rs_p3": 37.1, "rs_p4": 54.4, "rs_avg": 60.5, "eps": 45.7, "rev": 79.7, "roe": 16.9, "margin": 27.7, "vcs": 98.7, "vol_shrink": false, "adr": 5.52, "score": 7, "stop": 224.95, "tp1": 266.07, "tp2": 290.26}, {"ticker": "SNDK", "name": "Sandisk Corporation", "sector": "Technology", "industry": "Computer Hardware", "market_cap_b": 95.9, "close": 649.97, "pct_high": -6.5, "stage2": 9, "ema21": 564.02, "sma50": 414.54, "rs_p1": 100.0, "rs_p2": 90.0, "rs_p3": 96.77, "rs_p4": 98.4, "rs_avg": 95.06, "eps": 618.0, "rev": 61.2, "roe": -9.4, "margin": -11.7, "vcs": 124.9, "vol_shrink": true, "adr": 9.86, "score": 7, "stop": 604.47, "tp1": 714.97, "tp2": 779.96}, {"ticker": "DTE", "name": "DTE Energy Company", "sector": "Utilities", "industry": "Utilities - Regulated Electric", "market_cap_b": 30.1, "close": 145.0, "pct_high": -0.0, "stage2": 7, "ema21": 138.96, "sma50": 133.55, "rs_p1": 25.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 84.8, "rs_avg": 88.32, "eps": 25.5, "rev": 28.9, "roe": 12.2, "margin": 9.2, "vcs": 149.6, "vol_shrink": true, "adr": 2.32, "score": 7, "stop": 134.85, "tp1": 159.5, "tp2": 174.0}, {"ticker": "NEE", "name": "NextEra Energy, Inc.", "sector": "Utilities", "industry": "Utilities - Regulated Electric", "market_cap_b": 192.1, "close": 92.18, "pct_high": -1.7, "stage2": 9, "ema21": 89.33, "sma50": 84.47, "rs_p1": 25.0, "rs_p2": 80.0, "rs_p3": 93.55, "rs_p4": 96.8, "rs_avg": 90.12, "eps": 26.0, "rev": 20.7, "roe": 8.4, "margin": 24.9, "vcs": 99.2, "vol_shrink": true, "adr": 2.45, "score": 7, "stop": 85.73, "tp1": 101.4, "tp2": 110.62}, {"ticker": "AMAT", "name": "Applied Materials, Inc.", "sector": "Technology", "industry": "Semiconductor Equipment & Materials", "market_cap_b": 297.9, "close": 375.38, "pct_high": 0.0, "stage2": 9, "ema21": 336.5, "sma50": 302.42, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 75.2, "rev": -2.1, "roe": 38.9, "margin": 27.8, "vcs": 140.8, "vol_shrink": false, "adr": 4.82, "score": 6, "stop": 349.1, "tp1": 412.92, "tp2": 450.46}, {"ticker": "CBOE", "name": "Cboe Global Markets, Inc.", "sector": "Financial Services", "industry": "Financial Data & Stock Exchanges", "market_cap_b": 30.2, "close": 288.68, "pct_high": 0.0, "stage2": 9, "ema21": 274.99, "sma50": 263.99, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 60.4, "rev": 8.7, "roe": 23.4, "margin": 23.3, "vcs": 126.1, "vol_shrink": true, "adr": 2.77, "score": 6, "stop": 268.47, "tp1": 317.55, "tp2": 346.42}, {"ticker": "CME", "name": "CME Group Inc.", "sector": "Financial Services", "industry": "Financial Data & Stock Exchanges", "market_cap_b": 110.8, "close": 308.09, "pct_high": 0.0, "stage2": 9, "ema21": 296.44, "sma50": 282.12, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 35.0, "rev": 8.3, "roe": 14.8, "margin": 62.5, "vcs": 113.3, "vol_shrink": true, "adr": 1.99, "score": 6, "stop": 286.52, "tp1": 338.9, "tp2": 369.71}, {"ticker": "EME", "name": "EMCOR Group, Inc.", "sector": "Industrials", "industry": "Engineering & Construction", "market_cap_b": 36.4, "close": 812.79, "pct_high": 0.0, "stage2": 9, "ema21": 756.9, "sma50": 687.61, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 13.3, "rev": 16.4, "roe": 37.1, "margin": 7.0, "vcs": 114.5, "vol_shrink": false, "adr": 3.6, "score": 6, "stop": 755.89, "tp1": 894.07, "tp2": 975.35}, {"ticker": "EQT", "name": "EQT Corporation", "sector": "Energy", "industry": "Oil & Gas E&P", "market_cap_b": 37.8, "close": 60.5, "pct_high": -1.1, "stage2": 7, "ema21": 56.84, "sma50": 54.9, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 90.32, "rs_p4": 90.4, "rs_avg": 93.57, "eps": 54.6, "rev": 26.9, "roe": 9.0, "margin": 24.9, "vcs": 97.7, "vol_shrink": false, "adr": 3.37, "score": 6, "stop": 56.26, "tp1": 66.55, "tp2": 72.6}, {"ticker": "FRT", "name": "Federal Realty Investment Trust", "sector": "Real Estate", "industry": "REIT - Retail", "market_cap_b": 9.3, "close": 107.45, "pct_high": -0.2, "stage2": 9, "ema21": 104.36, "sma50": 101.86, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 99.2, "rs_avg": 99.73, "eps": 98.7, "rev": 7.5, "roe": 12.2, "margin": 32.1, "vcs": 102.4, "vol_shrink": false, "adr": 1.88, "score": 6, "stop": 99.93, "tp1": 118.2, "tp2": 128.94}, {"ticker": "HWM", "name": "Howmet Aerospace Inc.", "sector": "Industrials", "industry": "Aerospace & Defense", "market_cap_b": 103.9, "close": 258.1, "pct_high": 0.0, "stage2": 9, "ema21": 231.88, "sma50": 215.9, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 20.3, "rev": 14.6, "roe": 30.4, "margin": 18.3, "vcs": 117.3, "vol_shrink": true, "adr": 3.12, "score": 6, "stop": 240.03, "tp1": 283.91, "tp2": 309.72}, {"ticker": "JBHT", "name": "J.B. Hunt Transport Services, I", "sector": "Industrials", "industry": "Integrated Freight & Logistics", "market_cap_b": 21.9, "close": 230.16, "pct_high": -0.1, "stage2": 9, "ema21": 219.14, "sma50": 207.53, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 24.0, "rev": -1.6, "roe": 15.8, "margin": 5.0, "vcs": 111.2, "vol_shrink": true, "adr": 3.1, "score": 6, "stop": 214.05, "tp1": 253.18, "tp2": 276.19}, {"ticker": "JCI", "name": "Johnson Controls International ", "sector": "Industrials", "industry": "Building Products & Equipment", "market_cap_b": 88.0, "close": 143.79, "pct_high": 0.0, "stage2": 9, "ema21": 132.62, "sma50": 122.28, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 34.2, "rev": 6.8, "roe": 12.6, "margin": 14.2, "vcs": 123.1, "vol_shrink": true, "adr": 2.58, "score": 6, "stop": 133.72, "tp1": 158.17, "tp2": 172.55}, {"ticker": "RL", "name": "Ralph Lauren Corporation", "sector": "Consumer Cyclical", "industry": "Apparel Manufacturing", "market_cap_b": 23.3, "close": 385.03, "pct_high": 0.0, "stage2": 9, "ema21": 364.04, "sma50": 361.93, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 24.9, "rev": 12.2, "roe": 33.8, "margin": 11.7, "vcs": 106.7, "vol_shrink": true, "adr": 3.17, "score": 6, "stop": 358.08, "tp1": 423.53, "tp2": 462.04}, {"ticker": "TPR", "name": "Tapestry, Inc.", "sector": "Consumer Cyclical", "industry": "Luxury Goods", "market_cap_b": 32.1, "close": 157.09, "pct_high": 0.0, "stage2": 9, "ema21": 144.79, "sma50": 133.77, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 94.2, "rev": 14.0, "roe": 55.3, "margin": 7.0, "vcs": 116.8, "vol_shrink": true, "adr": 3.69, "score": 6, "stop": 146.09, "tp1": 172.8, "tp2": 188.51}, {"ticker": "TRGP", "name": "Targa Resources, Inc.", "sector": "Energy", "industry": "Oil & Gas Midstream", "market_cap_b": 49.8, "close": 231.35, "pct_high": 0.0, "stage2": 9, "ema21": 211.55, "sma50": 193.03, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 76.2, "rev": -7.9, "roe": 54.0, "margin": 11.3, "vcs": 90.8, "vol_shrink": false, "adr": 2.8, "score": 6, "stop": 215.16, "tp1": 254.49, "tp2": 277.62}, {"ticker": "GEV", "name": "GE Vernova Inc.", "sector": "Industrials", "industry": "Specialty Industrial Machinery", "market_cap_b": 225.3, "close": 830.34, "pct_high": -0.5, "stage2": 9, "ema21": 770.83, "sma50": 703.33, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 671.7, "rev": 3.8, "roe": 42.6, "margin": 12.8, "vcs": 99.4, "vol_shrink": true, "adr": 4.68, "score": 6, "stop": 772.22, "tp1": 913.37, "tp2": 996.41}, {"ticker": "MPWR", "name": "Monolithic Power Systems, Inc.", "sector": "Technology", "industry": "Semiconductors", "market_cap_b": 58.7, "close": 1204.1, "pct_high": -2.1, "stage2": 9, "ema21": 1144.6, "sma50": 1043.62, "rs_p1": 100.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": -88.4, "rev": 20.8, "roe": 17.9, "margin": 22.1, "vcs": 119.1, "vol_shrink": true, "adr": 5.07, "score": 6, "stop": 1119.81, "tp1": 1324.51, "tp2": 1444.92}, {"ticker": "PWR", "name": "Quanta Services, Inc.", "sector": "Industrials", "industry": "Engineering & Construction", "market_cap_b": 82.4, "close": 552.66, "pct_high": -0.2, "stage2": 9, "ema21": 503.97, "sma50": 464.23, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 2.6, "rev": 19.7, "roe": 12.7, "margin": 3.6, "vcs": 121.5, "vol_shrink": false, "adr": 3.87, "score": 6, "stop": 513.97, "tp1": 607.93, "tp2": 663.19}, {"ticker": "SPG", "name": "Simon Property Group, Inc.", "sector": "Real Estate", "industry": "REIT - Retail", "market_cap_b": 76.1, "close": 201.7, "pct_high": -0.2, "stage2": 9, "ema21": 194.39, "sma50": 188.21, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 358.1, "rev": 13.1, "roe": 104.1, "margin": 72.8, "vcs": 105.3, "vol_shrink": true, "adr": 2.05, "score": 6, "stop": 187.58, "tp1": 221.87, "tp2": 242.04}, {"ticker": "TRV", "name": "The Travelers Companies, Inc.", "sector": "Financial Services", "industry": "Insurance - Property & Casualty", "market_cap_b": 68.0, "close": 304.93, "pct_high": 0.0, "stage2": 9, "ema21": 293.48, "sma50": 287.35, "rs_p1": 100.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 23.4, "rev": 3.5, "roe": 20.7, "margin": 12.9, "vcs": 112.6, "vol_shrink": true, "adr": 2.05, "score": 6, "stop": 283.58, "tp1": 335.42, "tp2": 365.92}, {"ticker": "WMB", "name": "Williams Companies, Inc. (The)", "sector": "Energy", "industry": "Oil & Gas Midstream", "market_cap_b": 89.2, "close": 72.98, "pct_high": 0.0, "stage2": 9, "ema21": 68.61, "sma50": 63.58, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 50.8, "rev": 8.7, "roe": 18.6, "margin": 22.1, "vcs": 111.4, "vol_shrink": true, "adr": 2.62, "score": 6, "stop": 67.87, "tp1": 80.28, "tp2": 87.58}, {"ticker": "ECL", "name": "Ecolab Inc.", "sector": "Basic Materials", "industry": "Specialty Chemicals", "market_cap_b": 86.3, "close": 304.16, "pct_high": 0.0, "stage2": 9, "ema21": 292.22, "sma50": 276.93, "rs_p1": 75.0, "rs_p2": 90.0, "rs_p3": 96.77, "rs_p4": 97.6, "rs_avg": 94.79, "eps": 0, "rev": 17.8, "roe": 22.5, "margin": 12.9, "vcs": 114.4, "vol_shrink": true, "adr": 1.96, "score": 6, "stop": 282.87, "tp1": 334.58, "tp2": 364.99}, {"ticker": "LMT", "name": "Lockheed Martin Corporation", "sector": "Industrials", "industry": "Aerospace & Defense", "market_cap_b": 152.3, "close": 658.26, "pct_high": -1.2, "stage2": 9, "ema21": 622.43, "sma50": 557.71, "rs_p1": 50.0, "rs_p2": 90.0, "rs_p3": 96.77, "rs_p4": 98.4, "rs_avg": 95.06, "eps": 161.0, "rev": 9.1, "roe": 76.9, "margin": 6.7, "vcs": 124.4, "vol_shrink": true, "adr": 3.1, "score": 6, "stop": 612.18, "tp1": 724.09, "tp2": 789.91}, {"ticker": "MET", "name": "MetLife, Inc.", "sector": "Financial Services", "industry": "Insurance - Life", "market_cap_b": 52.1, "close": 79.1, "pct_high": -5.5, "stage2": 9, "ema21": 77.82, "sma50": 78.5, "rs_p1": 50.0, "rs_p2": 90.0, "rs_p3": 66.13, "rs_p4": 40.8, "rs_avg": 65.64, "eps": -34.2, "rev": 27.6, "roe": 12.0, "margin": 4.4, "vcs": 124.2, "vol_shrink": true, "adr": 2.64, "score": 6, "stop": 73.56, "tp1": 87.01, "tp2": 94.92}, {"ticker": "CB", "name": "Chubb Limited", "sector": "Financial Services", "industry": "Insurance - Property & Casualty", "market_cap_b": 130.5, "close": 331.62, "pct_high": -0.3, "stage2": 9, "ema21": 322.02, "sma50": 312.76, "rs_p1": 75.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 97.6, "rs_avg": 92.59, "eps": 28.0, "rev": 8.0, "roe": 14.3, "margin": 17.1, "vcs": 139.0, "vol_shrink": true, "adr": 2.18, "score": 6, "stop": 308.41, "tp1": 364.78, "tp2": 397.94}, {"ticker": "CPAY", "name": "Corpay, Inc.", "sector": "Technology", "industry": "Software - Infrastructure", "market_cap_b": 24.9, "close": 352.7, "pct_high": -5.1, "stage2": 8, "ema21": 334.23, "sma50": 321.34, "rs_p1": 100.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 96.8, "rs_avg": 92.32, "eps": 9.0, "rev": 20.7, "roe": 29.1, "margin": 23.6, "vcs": 150.6, "vol_shrink": false, "adr": 3.8, "score": 6, "stop": 328.01, "tp1": 387.97, "tp2": 423.24}, {"ticker": "FCX", "name": "Freeport-McMoRan, Inc.", "sector": "Basic Materials", "industry": "Copper", "market_cap_b": 92.4, "close": 64.34, "pct_high": -1.7, "stage2": 9, "ema21": 61.58, "sma50": 56.77, "rs_p1": 100.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 97.6, "rs_avg": 92.59, "eps": 47.7, "rev": -1.5, "roe": 13.9, "margin": 8.5, "vcs": 119.3, "vol_shrink": true, "adr": 4.55, "score": 6, "stop": 59.84, "tp1": 70.77, "tp2": 77.21}, {"ticker": "AMGN", "name": "Amgen Inc.", "sector": "Healthcare", "industry": "Drug Manufacturers - General", "market_cap_b": 202.0, "close": 374.75, "pct_high": -1.8, "stage2": 9, "ema21": 360.12, "sma50": 339.25, "rs_p1": 25.0, "rs_p2": 80.0, "rs_p3": 93.55, "rs_p4": 96.8, "rs_avg": 90.12, "eps": 112.1, "rev": 8.6, "roe": 106.1, "margin": 21.0, "vcs": 116.8, "vol_shrink": true, "adr": 2.73, "score": 6, "stop": 348.52, "tp1": 412.23, "tp2": 449.7}, {"ticker": "BMY", "name": "Bristol-Myers Squibb Company", "sector": "Healthcare", "industry": "Drug Manufacturers - General", "market_cap_b": 123.5, "close": 60.66, "pct_high": -2.1, "stage2": 9, "ema21": 58.54, "sma50": 55.65, "rs_p1": 25.0, "rs_p2": 80.0, "rs_p3": 93.55, "rs_p4": 96.8, "rs_avg": 90.12, "eps": 1392.1, "rev": 1.3, "roe": 40.4, "margin": 14.6, "vcs": 102.0, "vol_shrink": true, "adr": 2.3, "score": 6, "stop": 56.41, "tp1": 66.73, "tp2": 72.79}, {"ticker": "DG", "name": "Dollar General Corporation", "sector": "Consumer Defensive", "industry": "Discount Stores", "market_cap_b": 33.2, "close": 150.64, "pct_high": -2.1, "stage2": 9, "ema21": 147.79, "sma50": 142.64, "rs_p1": 0.0, "rs_p2": 80.0, "rs_p3": 90.32, "rs_p4": 95.2, "rs_avg": 88.51, "eps": 43.8, "rev": 4.6, "roe": 16.5, "margin": 3.0, "vcs": 105.9, "vol_shrink": true, "adr": 3.04, "score": 6, "stop": 140.1, "tp1": 165.7, "tp2": 180.77}, {"ticker": "BDX", "name": "Becton, Dickinson and Company", "sector": "Healthcare", "industry": "Medical Instruments & Supplies", "market_cap_b": 67.2, "close": 185.39, "pct_high": 0.0, "stage2": 9, "ema21": 170.93, "sma50": 161.51, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 28.6, "rev": 1.6, "roe": 7.0, "margin": 8.0, "vcs": 127.0, "vol_shrink": true, "adr": 3.02, "score": 5, "stop": 172.41, "tp1": 203.93, "tp2": 222.47}, {"ticker": "CIEN", "name": "Ciena Corporation", "sector": "Technology", "industry": "Communication Equipment", "market_cap_b": 47.4, "close": 334.95, "pct_high": 0.0, "stage2": 9, "ema21": 283.3, "sma50": 250.75, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": -49.3, "rev": 20.3, "roe": 4.4, "margin": 2.6, "vcs": 146.4, "vol_shrink": true, "adr": 8.11, "score": 5, "stop": 311.5, "tp1": 368.44, "tp2": 401.94}, {"ticker": "FANG", "name": "Diamondback Energy, Inc.", "sector": "Energy", "industry": "Oil & Gas E&P", "market_cap_b": 50.4, "close": 176.01, "pct_high": 0.0, "stage2": 9, "ema21": 165.48, "sma50": 156.36, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 10.0, "rev": 42.0, "roe": 10.9, "margin": 28.7, "vcs": 88.3, "vol_shrink": false, "adr": 2.89, "score": 5, "stop": 163.69, "tp1": 193.61, "tp2": 211.21}, {"ticker": "HST", "name": "Host Hotels & Resorts, Inc.", "sector": "Real Estate", "industry": "REIT - Hotel & Motel", "market_cap_b": 14.2, "close": 20.4, "pct_high": 0.0, "stage2": 9, "ema21": 19.43, "sma50": 18.61, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 26.7, "rev": 12.8, "roe": 11.5, "margin": 12.5, "vcs": 103.9, "vol_shrink": false, "adr": 2.44, "score": 5, "stop": 18.97, "tp1": 22.44, "tp2": 24.48}, {"ticker": "OMC", "name": "Omnicom Group Inc.", "sector": "Communication Services", "industry": "Advertising Agencies", "market_cap_b": 26.4, "close": 83.26, "pct_high": 0.0, "stage2": 9, "ema21": 74.15, "sma50": 76.99, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 98.39, "rs_p4": 94.4, "rs_avg": 97.6, "eps": 0, "rev": 27.9, "roe": 0.8, "margin": -0.3, "vcs": 162.2, "vol_shrink": false, "adr": 3.9, "score": 5, "stop": 77.43, "tp1": 91.59, "tp2": 99.91}, {"ticker": "AES", "name": "The AES Corporation", "sector": "Utilities", "industry": "Utilities - Diversified", "market_cap_b": 11.8, "close": 16.51, "pct_high": 0.0, "stage2": 9, "ema21": 15.69, "sma50": 14.62, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 25.3, "rev": 1.9, "roe": 5.1, "margin": 8.7, "vcs": 84.8, "vol_shrink": true, "adr": 3.06, "score": 5, "stop": 15.35, "tp1": 18.16, "tp2": 19.81}, {"ticker": "AMCR", "name": "Amcor plc", "sector": "Consumer Cyclical", "industry": "Packaging & Containers", "market_cap_b": 23.3, "close": 50.49, "pct_high": -0.5, "stage2": 8, "ema21": 47.48, "sma50": 44.12, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": -32.1, "rev": 68.1, "roe": 7.7, "margin": 3.0, "vcs": 129.4, "vol_shrink": true, "adr": 2.66, "score": 5, "stop": 46.96, "tp1": 55.54, "tp2": 60.59}, {"ticker": "FE", "name": "FirstEnergy Corp.", "sector": "Utilities", "industry": "Utilities - Regulated Electric", "market_cap_b": 29.0, "close": 50.2, "pct_high": 0.0, "stage2": 9, "ema21": 47.82, "sma50": 45.85, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 0, "rev": 20.7, "roe": 9.2, "margin": 6.8, "vcs": 126.0, "vol_shrink": false, "adr": 1.99, "score": 5, "stop": 46.69, "tp1": 55.22, "tp2": 60.24}, {"ticker": "KMI", "name": "Kinder Morgan, Inc.", "sector": "Energy", "industry": "Oil & Gas Midstream", "market_cap_b": 72.8, "close": 32.73, "pct_high": 0.0, "stage2": 9, "ema21": 30.78, "sma50": 28.52, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 49.3, "rev": 13.1, "roe": 9.8, "margin": 18.0, "vcs": 90.1, "vol_shrink": true, "adr": 2.01, "score": 5, "stop": 30.44, "tp1": 36.0, "tp2": 39.28}, {"ticker": "OXY", "name": "Occidental Petroleum Corporatio", "sector": "Energy", "industry": "Oil & Gas E&P", "market_cap_b": 51.1, "close": 51.84, "pct_high": 0.0, "stage2": 8, "ema21": 46.38, "sma50": 43.37, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 0, "rev": 148.9, "roe": 5.9, "margin": 10.8, "vcs": 116.7, "vol_shrink": false, "adr": 2.93, "score": 5, "stop": 48.21, "tp1": 57.02, "tp2": 62.21}, {"ticker": "TDY", "name": "Teledyne Technologies Incorpora", "sector": "Technology", "industry": "Scientific & Technical Instruments", "market_cap_b": 31.4, "close": 668.72, "pct_high": 0.0, "stage2": 9, "ema21": 635.19, "sma50": 577.05, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 39.1, "rev": 7.3, "roe": 8.9, "margin": 14.6, "vcs": 129.3, "vol_shrink": true, "adr": 2.68, "score": 5, "stop": 621.91, "tp1": 735.59, "tp2": 802.46}, {"ticker": "NI", "name": "NiSource Inc", "sector": "Utilities", "industry": "Utilities - Regulated Gas", "market_cap_b": 21.9, "close": 46.37, "pct_high": -0.7, "stage2": 9, "ema21": 44.69, "sma50": 42.92, "rs_p1": 50.0, "rs_p2": 90.0, "rs_p3": 96.77, "rs_p4": 98.4, "rs_avg": 95.06, "eps": 11.1, "rev": 19.8, "roe": 9.1, "margin": 14.0, "vcs": 102.8, "vol_shrink": true, "adr": 1.87, "score": 5, "stop": 43.12, "tp1": 51.01, "tp2": 55.64}, {"ticker": "PPL", "name": "PPL Corporation", "sector": "Utilities", "industry": "Utilities - Regulated Electric", "market_cap_b": 27.7, "close": 37.44, "pct_high": -1.0, "stage2": 8, "ema21": 36.44, "sma50": 35.51, "rs_p1": 50.0, "rs_p2": 90.0, "rs_p3": 93.55, "rs_p4": 62.4, "rs_avg": 81.98, "eps": 49.9, "rev": 2.8, "roe": 8.2, "margin": 13.1, "vcs": 126.5, "vol_shrink": false, "adr": 2.03, "score": 5, "stop": 34.82, "tp1": 41.18, "tp2": 44.93}, {"ticker": "REG", "name": "Regency Centers Corporation", "sector": "Real Estate", "industry": "REIT - Retail", "market_cap_b": 14.4, "close": 76.85, "pct_high": -0.4, "stage2": 9, "ema21": 74.46, "sma50": 71.17, "rs_p1": 50.0, "rs_p2": 90.0, "rs_p3": 96.77, "rs_p4": 96.8, "rs_avg": 94.52, "eps": 141.9, "rev": 8.9, "roe": 7.7, "margin": 32.7, "vcs": 111.4, "vol_shrink": true, "adr": 2.04, "score": 5, "stop": 71.47, "tp1": 84.53, "tp2": 92.22}, {"ticker": "WBD", "name": "Warner Bros. Discovery, Inc. - ", "sector": "Communication Services", "industry": "Entertainment", "market_cap_b": 71.3, "close": 28.75, "pct_high": -4.1, "stage2": 9, "ema21": 28.09, "sma50": 28.38, "rs_p1": 50.0, "rs_p2": 90.0, "rs_p3": 74.19, "rs_p4": 87.2, "rs_avg": 83.8, "eps": 0, "rev": -6.0, "roe": 1.0, "margin": 1.3, "vcs": 43.0, "vol_shrink": true, "adr": 1.61, "score": 5, "stop": 26.74, "tp1": 31.63, "tp2": 34.5}, {"ticker": "ES", "name": "Eversource Energy (D/B/A)", "sector": "Utilities", "industry": "Utilities - Regulated Electric", "market_cap_b": 27.6, "close": 73.56, "pct_high": -0.7, "stage2": 9, "ema21": 70.51, "sma50": 68.77, "rs_p1": 25.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 76.0, "rs_avg": 85.39, "eps": 466.2, "rev": 13.4, "roe": 10.8, "margin": 12.5, "vcs": 120.7, "vol_shrink": false, "adr": 2.59, "score": 5, "stop": 68.41, "tp1": 80.92, "tp2": 88.27}, {"ticker": "PEG", "name": "Public Service Enterprise Group", "sector": "Utilities", "industry": "Utilities - Regulated Electric", "market_cap_b": 42.7, "close": 85.57, "pct_high": -3.6, "stage2": 7, "ema21": 82.93, "sma50": 80.7, "rs_p1": 25.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 80.0, "rs_avg": 86.72, "eps": 19.2, "rev": 22.1, "roe": 12.6, "margin": 17.8, "vcs": 108.7, "vol_shrink": true, "adr": 2.17, "score": 5, "stop": 79.58, "tp1": 94.13, "tp2": 102.68}, {"ticker": "VLO", "name": "Valero Energy Corporation", "sector": "Energy", "industry": "Oil & Gas Refining & Marketing", "market_cap_b": 62.4, "close": 200.76, "pct_high": -1.5, "stage2": 9, "ema21": 193.59, "sma50": 180.9, "rs_p1": 75.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 97.6, "rs_avg": 92.59, "eps": 319.6, "rev": 3.9, "roe": 8.3, "margin": 1.9, "vcs": 96.8, "vol_shrink": true, "adr": 3.34, "score": 5, "stop": 186.71, "tp1": 220.84, "tp2": 240.91}, {"ticker": "VRTX", "name": "Vertex Pharmaceuticals Incorpor", "sector": "Healthcare", "industry": "Biotechnology", "market_cap_b": 121.1, "close": 476.9, "pct_high": -7.2, "stage2": 7, "ema21": 469.45, "sma50": 461.84, "rs_p1": 50.0, "rs_p2": 85.0, "rs_p3": 93.55, "rs_p4": 96.8, "rs_avg": 91.78, "eps": 32.9, "rev": 9.5, "roe": 22.5, "margin": 32.9, "vcs": 123.2, "vol_shrink": false, "adr": 2.86, "score": 5, "stop": 443.52, "tp1": 524.59, "tp2": 572.28}, {"ticker": "BEN", "name": "Franklin Resources, Inc.", "sector": "Financial Services", "industry": "Asset Management", "market_cap_b": 14.4, "close": 27.67, "pct_high": -1.7, "stage2": 9, "ema21": 26.88, "sma50": 25.4, "rs_p1": 50.0, "rs_p2": 80.0, "rs_p3": 93.55, "rs_p4": 96.8, "rs_avg": 90.12, "eps": 60.6, "rev": 3.4, "roe": 4.5, "margin": 7.0, "vcs": 123.8, "vol_shrink": true, "adr": 3.03, "score": 5, "stop": 25.73, "tp1": 30.44, "tp2": 33.2}, {"ticker": "CAH", "name": "Cardinal Health, Inc.", "sector": "Healthcare", "industry": "Medical Distribution", "market_cap_b": 52.8, "close": 224.44, "pct_high": -1.2, "stage2": 9, "ema21": 218.73, "sma50": 210.18, "rs_p1": 50.0, "rs_p2": 80.0, "rs_p3": 93.55, "rs_p4": 96.8, "rs_avg": 90.12, "eps": 19.4, "rev": 18.8, "roe": 0, "margin": 0.7, "vcs": 145.6, "vol_shrink": true, "adr": 2.89, "score": 5, "stop": 208.73, "tp1": 246.88, "tp2": 269.33}, {"ticker": "YUM", "name": "Yum! Brands, Inc.", "sector": "Consumer Cyclical", "industry": "Restaurants", "market_cap_b": 45.3, "close": 163.33, "pct_high": -0.1, "stage2": 9, "ema21": 159.44, "sma50": 155.3, "rs_p1": 50.0, "rs_p2": 80.0, "rs_p3": 93.55, "rs_p4": 96.8, "rs_avg": 90.12, "eps": 27.3, "rev": 6.4, "roe": 0, "margin": 19.0, "vcs": 109.4, "vol_shrink": true, "adr": 2.05, "score": 5, "stop": 151.9, "tp1": 179.66, "tp2": 196.0}, {"ticker": "CTRA", "name": "Coterra Energy Inc.", "sector": "Energy", "industry": "Oil & Gas E&P", "market_cap_b": 23.8, "close": 31.28, "pct_high": -1.4, "stage2": 9, "ema21": 29.82, "sma50": 27.46, "rs_p1": 0.0, "rs_p2": 75.0, "rs_p3": 91.94, "rs_p4": 96.0, "rs_avg": 87.65, "eps": 23.5, "rev": 34.9, "roe": 11.9, "margin": 24.7, "vcs": 120.3, "vol_shrink": true, "adr": 3.13, "score": 5, "stop": 29.09, "tp1": 34.41, "tp2": 37.54}, {"ticker": "CINF", "name": "Cincinnati Financial Corporatio", "sector": "Financial Services", "industry": "Insurance - Property & Casualty", "market_cap_b": 25.4, "close": 163.0, "pct_high": -5.6, "stage2": 7, "ema21": 163.86, "sma50": 163.55, "rs_p1": 0.0, "rs_p2": 50.0, "rs_p3": 37.1, "rs_p4": 43.2, "rs_avg": 43.43, "eps": 67.4, "rev": 21.8, "roe": 16.0, "margin": 18.9, "vcs": 125.0, "vol_shrink": true, "adr": 2.21, "score": 5, "stop": 151.59, "tp1": 179.3, "tp2": 195.6}, {"ticker": "CSX", "name": "CSX Corporation", "sector": "Industrials", "industry": "Railroads", "market_cap_b": 78.7, "close": 42.31, "pct_high": 0.0, "stage2": 9, "ema21": 39.82, "sma50": 37.65, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": -0.4, "rev": -0.9, "roe": 22.5, "margin": 20.5, "vcs": 100.1, "vol_shrink": true, "adr": 2.17, "score": 4, "stop": 39.35, "tp1": 46.54, "tp2": 50.77}, {"ticker": "FDX", "name": "FedEx Corporation", "sector": "Industrials", "industry": "Integrated Freight & Logistics", "market_cap_b": 91.7, "close": 388.48, "pct_high": 0.0, "stage2": 9, "ema21": 355.47, "sma50": 318.71, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": -13.3, "rev": 13.9, "roe": 15.9, "margin": 4.8, "vcs": 103.0, "vol_shrink": true, "adr": 2.62, "score": 4, "stop": 361.29, "tp1": 427.33, "tp2": 466.18}, {"ticker": "GEHC", "name": "GE HealthCare Technologies Inc.", "sector": "Healthcare", "industry": "Medical Devices", "market_cap_b": 38.4, "close": 84.23, "pct_high": -7.4, "stage2": 8, "ema21": 81.36, "sma50": 82.46, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 72.58, "rs_p4": 86.4, "rs_avg": 86.33, "eps": -17.7, "rev": 7.1, "roe": 22.4, "margin": 10.1, "vcs": 114.7, "vol_shrink": false, "adr": 3.01, "score": 4, "stop": 78.33, "tp1": 92.65, "tp2": 101.08}, {"ticker": "KEYS", "name": "Keysight Technologies Inc.", "sector": "Technology", "industry": "Scientific & Technical Instruments", "market_cap_b": 41.8, "close": 243.54, "pct_high": 0.0, "stage2": 9, "ema21": 228.89, "sma50": 216.18, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": 0, "rev": 10.3, "roe": 15.8, "margin": 15.8, "vcs": 128.6, "vol_shrink": false, "adr": 3.21, "score": 4, "stop": 226.49, "tp1": 267.89, "tp2": 292.25}, {"ticker": "PH", "name": "Parker-Hannifin Corporation", "sector": "Industrials", "industry": "Specialty Industrial Machinery", "market_cap_b": 129.0, "close": 1022.23, "pct_high": 0.0, "stage2": 9, "ema21": 974.86, "sma50": 928.4, "rs_p1": 100.0, "rs_p2": 100.0, "rs_p3": 100.0, "rs_p4": 100.0, "rs_avg": 100.0, "eps": -9.0, "rev": 9.1, "roe": 25.8, "margin": 17.3, "vcs": 89.3, "vol_shrink": true, "adr": 2.23, "score": 4, "stop": 950.67, "tp1": 1124.45, "tp2": 1226.68}, {"ticker": "APA", "name": "APA Corporation", "sector": "Energy", "industry": "Oil & Gas E&P", "market_cap_b": 10.4, "close": 29.06, "pct_high": -0.1, "stage2": 9, "ema21": 27.23, "sma50": 25.72, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 0, "rev": -16.4, "roe": 27.4, "margin": 16.1, "vcs": 93.3, "vol_shrink": false, "adr": 3.86, "score": 4, "stop": 27.03, "tp1": 31.97, "tp2": 34.87}, {"ticker": "BKR", "name": "Baker Hughes Company", "sector": "Energy", "industry": "Oil & Gas Equipment & Services", "market_cap_b": 61.5, "close": 62.21, "pct_high": -0.6, "stage2": 9, "ema21": 58.4, "sma50": 52.28, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": -25.6, "rev": 0.3, "roe": 14.6, "margin": 9.3, "vcs": 93.6, "vol_shrink": true, "adr": 2.77, "score": 4, "stop": 57.86, "tp1": 68.43, "tp2": 74.65}, {"ticker": "DE", "name": "Deere & Company", "sector": "Industrials", "industry": "Farm & Heavy Construction Machinery", "market_cap_b": 179.6, "close": 662.49, "pct_high": 0.0, "stage2": 8, "ema21": 579.61, "sma50": 519.17, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": -24.1, "rev": 13.0, "roe": 19.6, "margin": 10.3, "vcs": 132.5, "vol_shrink": false, "adr": 2.87, "score": 4, "stop": 616.12, "tp1": 728.74, "tp2": 794.99}, {"ticker": "DLTR", "name": "Dollar Tree, Inc.", "sector": "Consumer Defensive", "industry": "Discount Stores", "market_cap_b": 27.4, "close": 134.51, "pct_high": -4.7, "stage2": 9, "ema21": 127.14, "sma50": 127.39, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 88.71, "rs_p4": 94.4, "rs_avg": 92.7, "eps": 10.6, "rev": 9.4, "roe": 20.1, "margin": -15.4, "vcs": 95.2, "vol_shrink": false, "adr": 3.47, "score": 4, "stop": 125.09, "tp1": 147.96, "tp2": 161.41}, {"ticker": "HAL", "name": "Halliburton Company", "sector": "Energy", "industry": "Oil & Gas Equipment & Services", "market_cap_b": 29.5, "close": 35.11, "pct_high": -0.7, "stage2": 9, "ema21": 33.92, "sma50": 31.69, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": -0.5, "rev": 0.8, "roe": 12.3, "margin": 5.8, "vcs": 90.7, "vol_shrink": true, "adr": 3.33, "score": 4, "stop": 32.65, "tp1": 38.62, "tp2": 42.13}, {"ticker": "ROST", "name": "Ross Stores, Inc.", "sector": "Consumer Cyclical", "industry": "Apparel Retail", "market_cap_b": 65.5, "close": 201.45, "pct_high": 0.0, "stage2": 9, "ema21": 193.65, "sma50": 188.14, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 6.8, "rev": 10.4, "roe": 37.4, "margin": 9.5, "vcs": 84.9, "vol_shrink": true, "adr": 1.77, "score": 4, "stop": 187.35, "tp1": 221.59, "tp2": 241.74}, {"ticker": "TJX", "name": "TJX Companies, Inc. (The)", "sector": "Consumer Cyclical", "industry": "Apparel Retail", "market_cap_b": 176.1, "close": 158.23, "pct_high": 0.0, "stage2": 9, "ema21": 154.35, "sma50": 154.29, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 91.94, "rs_p4": 96.0, "rs_avg": 94.31, "eps": 12.3, "rev": 7.5, "roe": 58.4, "margin": 8.7, "vcs": 107.0, "vol_shrink": true, "adr": 1.84, "score": 4, "stop": 147.15, "tp1": 174.05, "tp2": 189.88}, {"ticker": "UNP", "name": "Union Pacific Corporation", "sector": "Industrials", "industry": "Railroads", "market_cap_b": 157.9, "close": 266.1, "pct_high": 0.0, "stage2": 9, "ema21": 251.68, "sma50": 238.95, "rs_p1": 75.0, "rs_p2": 95.0, "rs_p3": 98.39, "rs_p4": 99.2, "rs_avg": 97.53, "eps": 6.8, "rev": -0.6, "roe": 40.4, "margin": 29.1, "vcs": 104.3, "vol_shrink": true, "adr": 2.18, "score": 4, "stop": 247.47, "tp1": 292.71, "tp2": 319.32}, {"ticker": "AEP", "name": "American Electric Power Company", "sector": "Utilities", "industry": "Utilities - Regulated Electric", "market_cap_b": 70.0, "close": 129.37, "pct_high": -0.7, "stage2": 9, "ema21": 123.03, "sma50": 117.79, "rs_p1": 50.0, "rs_p2": 90.0, "rs_p3": 96.77, "rs_p4": 98.4, "rs_avg": 95.06, "eps": -13.4, "rev": 13.2, "roe": 12.5, "margin": 16.4, "vcs": 125.6, "vol_shrink": false, "adr": 2.02, "score": 4, "stop": 120.31, "tp1": 142.31, "tp2": 155.24}, {"ticker": "AVY", "name": "Avery Dennison Corporation", "sector": "Consumer Cyclical", "industry": "Packaging & Containers", "market_cap_b": 15.2, "close": 196.92, "pct_high": 0.0, "stage2": 8, "ema21": 191.27, "sma50": 186.28, "rs_p1": 75.0, "rs_p2": 90.0, "rs_p3": 96.77, "rs_p4": 98.4, "rs_avg": 95.06, "eps": -0.6, "rev": 3.9, "roe": 30.2, "margin": 7.8, "vcs": 105.8, "vol_shrink": true, "adr": 2.06, "score": 4, "stop": 183.14, "tp1": 216.61, "tp2": 236.3}, {"ticker": "HON", "name": "Honeywell International Inc.", "sector": "Industrials", "industry": "Conglomerates", "market_cap_b": 164.4, "close": 243.97, "pct_high": 0.0, "stage2": 8, "ema21": 233.33, "sma50": 215.01, "rs_p1": 50.0, "rs_p2": 90.0, "rs_p3": 96.77, "rs_p4": 98.4, "rs_avg": 95.06, "eps": -76.4, "rev": -3.3, "roe": 26.1, "margin": 12.6, "vcs": 101.4, "vol_shrink": true, "adr": 1.88, "score": 4, "stop": 226.89, "tp1": 268.37, "tp2": 292.76}, {"ticker": "NCLH", "name": "Norwegian Cruise Line Holdings ", "sector": "Consumer Cyclical", "industry": "Travel Services", "market_cap_b": 11.1, "close": 24.31, "pct_high": -9.8, "stage2": 8, "ema21": 22.95, "sma50": 22.45, "rs_p1": 50.0, "rs_p2": 90.0, "rs_p3": 90.32, "rs_p4": 64.8, "rs_avg": 81.71, "eps": -9.6, "rev": 4.7, "roe": 39.9, "margin": 6.8, "vcs": 138.4, "vol_shrink": false, "adr": 5.1, "score": 4, "stop": 22.61, "tp1": 26.74, "tp2": 29.17}, {"ticker": "NOC", "name": "Northrop Grumman Corporation", "sector": "Industrials", "industry": "Aerospace & Defense", "market_cap_b": 103.3, "close": 723.56, "pct_high": -1.8, "stage2": 9, "ema21": 691.23, "sma50": 637.11, "rs_p1": 50.0, "rs_p2": 90.0, "rs_p3": 96.77, "rs_p4": 98.4, "rs_avg": 95.06, "eps": 15.2, "rev": 9.6, "roe": 26.2, "margin": 10.0, "vcs": 117.8, "vol_shrink": true, "adr": 2.84, "score": 4, "stop": 672.91, "tp1": 795.92, "tp2": 868.27}, {"ticker": "TGT", "name": "Target Corporation", "sector": "Consumer Defensive", "industry": "Discount Stores", "market_cap_b": 53.0, "close": 116.69, "pct_high": -4.2, "stage2": 9, "ema21": 111.4, "sma50": 104.45, "rs_p1": 50.0, "rs_p2": 90.0, "rs_p3": 96.77, "rs_p4": 98.4, "rs_avg": 95.06, "eps": -18.4, "rev": -1.6, "roe": 25.1, "margin": 3.6, "vcs": 105.5, "vol_shrink": true, "adr": 3.09, "score": 4, "stop": 108.52, "tp1": 128.36, "tp2": 140.03}, {"ticker": "URI", "name": "United Rentals, Inc.", "sector": "Industrials", "industry": "Rental & Leasing Services", "market_cap_b": 57.8, "close": 909.11, "pct_high": -10.5, "stage2": 8, "ema21": 872.74, "sma50": 860.95, "rs_p1": 100.0, "rs_p2": 90.0, "rs_p3": 82.26, "rs_p4": 54.4, "rs_avg": 75.55, "eps": -1.9, "rev": 2.8, "roe": 28.4, "margin": 15.5, "vcs": 112.5, "vol_shrink": true, "adr": 3.78, "score": 4, "stop": 845.47, "tp1": 1000.02, "tp2": 1090.93}, {"ticker": "DECK", "name": "Deckers Outdoor Corporation", "sector": "Consumer Cyclical", "industry": "Footwear & Accessories", "market_cap_b": 17.3, "close": 118.69, "pct_high": -19.0, "stage2": 8, "ema21": 112.7, "sma50": 106.35, "rs_p1": 50.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 83.2, "rs_avg": 87.79, "eps": 11.0, "rev": 7.1, "roe": 39.7, "margin": 19.3, "vcs": 81.3, "vol_shrink": true, "adr": 3.63, "score": 4, "stop": 110.38, "tp1": 130.56, "tp2": 142.43}, {"ticker": "DRI", "name": "Darden Restaurants, Inc.", "sector": "Consumer Cyclical", "industry": "Restaurants", "market_cap_b": 25.3, "close": 217.27, "pct_high": -1.6, "stage2": 8, "ema21": 210.02, "sma50": 199.6, "rs_p1": 50.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 84.0, "rs_avg": 88.05, "eps": 11.8, "rev": 7.3, "roe": 54.1, "margin": 8.9, "vcs": 116.3, "vol_shrink": true, "adr": 2.7, "score": 4, "stop": 202.06, "tp1": 239.0, "tp2": 260.72}, {"ticker": "HUBB", "name": "Hubbell Inc", "sector": "Industrials", "industry": "Electrical Equipment & Parts", "market_cap_b": 28.0, "close": 526.73, "pct_high": 0.0, "stage2": 9, "ema21": 504.88, "sma50": 477.36, "rs_p1": 25.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 97.6, "rs_avg": 92.59, "eps": 13.8, "rev": 11.9, "roe": 24.5, "margin": 15.2, "vcs": 113.5, "vol_shrink": true, "adr": 3.09, "score": 4, "stop": 489.86, "tp1": 579.4, "tp2": 632.08}, {"ticker": "MRK", "name": "Merck & Company, Inc.", "sector": "Healthcare", "industry": "Drug Manufacturers - General", "market_cap_b": 305.4, "close": 122.26, "pct_high": 0.0, "stage2": 9, "ema21": 116.89, "sma50": 109.64, "rs_p1": 25.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 97.6, "rs_avg": 92.59, "eps": -19.3, "rev": 5.0, "roe": 37.2, "margin": 28.1, "vcs": 108.5, "vol_shrink": true, "adr": 2.49, "score": 4, "stop": 113.7, "tp1": 134.49, "tp2": 146.71}, {"ticker": "ODFL", "name": "Old Dominion Freight Line, Inc.", "sector": "Industrials", "industry": "Trucking", "market_cap_b": 42.3, "close": 201.39, "pct_high": -3.4, "stage2": 8, "ema21": 188.87, "sma50": 174.04, "rs_p1": 100.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 97.6, "rs_avg": 92.59, "eps": -11.2, "rev": -5.7, "roe": 23.9, "margin": 18.6, "vcs": 125.7, "vol_shrink": true, "adr": 3.74, "score": 4, "stop": 187.29, "tp1": 221.53, "tp2": 241.67}, {"ticker": "PCAR", "name": "PACCAR Inc.", "sector": "Industrials", "industry": "Farm & Heavy Construction Machinery", "market_cap_b": 67.5, "close": 128.46, "pct_high": -0.8, "stage2": 9, "ema21": 124.67, "sma50": 118.66, "rs_p1": 100.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 97.6, "rs_avg": 92.59, "eps": -35.9, "rev": -13.7, "roe": 12.9, "margin": 8.4, "vcs": 92.2, "vol_shrink": true, "adr": 2.42, "score": 4, "stop": 119.47, "tp1": 141.31, "tp2": 154.15}, {"ticker": "SNA", "name": "Snap-On Incorporated", "sector": "Industrials", "industry": "Tools & Accessories", "market_cap_b": 20.1, "close": 385.88, "pct_high": 0.0, "stage2": 9, "ema21": 375.6, "sma50": 363.0, "rs_p1": 25.0, "rs_p2": 85.0, "rs_p3": 95.16, "rs_p4": 97.6, "rs_avg": 92.59, "eps": 2.9, "rev": 3.1, "roe": 18.3, "margin": 19.7, "vcs": 118.6, "vol_shrink": true, "adr": 2.31, "score": 4, "stop": 358.87, "tp1": 424.47, "tp2": 463.06}]};
+
+const {useState, useMemo, useCallback} = React;
+
+const rsCol = v => v>=90?"#00ff88":v>=80?"#7dff9e":v>=70?"#f0d060":v>=55?"#ff9933":"#ff4444";
+const numCol = v => v>2?"#00e676":v>0?"#69f0ae":v<-2?"#ff5252":v<0?"#ff8a80":"#607d8b";
+const fmt = (v,d=1) => v==null?"—":`${v>0?"+":""}${Number(v).toFixed(d)}%`;
+const fmtRS = v => v==null?"—":Number(v).toFixed(1);
+const SCORE_DEF = [
+  {min:9,label:"◎ 最有力",col:"#00ff88"},
+  {min:7,label:"○ 有力",col:"#7dff9e"},
+  {min:5,label:"△ 候補",col:"#f0d060"},
+  {min:0,label:"✕",col:"#4a6a88"},
+];
+const TD = {padding:"7px 9px",borderBottom:"1px solid rgba(14,28,48,.6)",whiteSpace:"nowrap"};
+
+function ScoreBadge({score}){
+  const d = SCORE_DEF.find(x=>score>=x.min)||SCORE_DEF[3];
+  return React.createElement("span",{style:{
+    fontSize:10,padding:"2px 7px",borderRadius:4,fontWeight:700,
+    background:`${d.col}18`,color:d.col,border:`1px solid ${d.col}40`
+  }},d.label);
+}
+
+function RSCell({val,isSort}){
+  if(val==null) return React.createElement("td",{style:{...TD,textAlign:"right",color:"#2a4a6a"}},"—");
+  const col=rsCol(val);
+  return React.createElement("td",{style:{...TD,textAlign:"right"}},
+    React.createElement("span",{style:{
+      color:col,fontWeight:val>=80?700:400,
+      background:isSort?`${col}14`:"transparent",
+      borderRadius:3,padding:isSort?"1px 5px":0
+    }},fmtRS(val))
+  );
+}
+
+function App(){
+  const [sortK,setSortK]=useState("rs_p2");
+  const [sortD,setSortD]=useState("desc");
+  const [search,setSearch]=useState("");
+  const [minRS,setMinRS]=useState(0);
+  const [minEPS,setMinEPS]=useState(-999);
+  const [maxVCS,setMaxVCS]=useState(100);
+  const [minStage,setMinStage]=useState(0);
+  const [selected,setSelected]=useState(null);
+  const [showP1,setShowP1]=useState(false);
+  const [showP2,setShowP2]=useState(true);
+  const [showP3,setShowP3]=useState(true);
+  const [showP4,setShowP4]=useState(true);
+  const [showAvg,setShowAvg]=useState(true);
+  const [analysis,setAnalysis]=useState("");
+  const [aiLoad,setAiLoad]=useState(false);
+
+  const stocks = RAW_DATA.stocks||[];
+
+  const rows = useMemo(()=>{
+    return stocks.filter(s=>{
+      if(search){const q=search.toUpperCase();if(!s.ticker?.includes(q)&&!s.name?.toUpperCase().includes(q)&&!s.sector?.toUpperCase().includes(q))return false;}
+      if((s.rs_p2??0)<minRS)return false;
+      if((s.eps??0)<minEPS)return false;
+      if((s.vcs??100)>maxVCS)return false;
+      if((s.stage2??0)<minStage)return false;
+      return true;
+    }).sort((a,b)=>{
+      const av=a[sortK]??-999,bv=b[sortK]??-999;
+      return sortD==="desc"?bv-av:av-bv;
+    });
+  },[search,sortK,sortD,minRS,minEPS,maxVCS,minStage]);
+
+  const handleSort=useCallback(k=>{
+    if(k===sortK)setSortD(d=>d==="desc"?"asc":"desc");
+    else{setSortK(k);setSortD("desc");}
+  },[sortK]);
+
+  const fetchAI=useCallback(async()=>{
+    setAiLoad(true);setAnalysis("");
+    const top=[...rows].sort((a,b)=>(b.score??0)-(a.score??0)).slice(0,8);
+    const mkt=RAW_DATA.market;
+    const prompt=`米国株スイングトレードの専門アナリストとして分析してください。
+市場環境: ${mkt?.icon} ${mkt?.mode} | VIX: ${mkt?.vix}
+RS計算: percentrank(TICKER/SPY日次終値, period) TradingView準拠
+スコア上位銘柄:
+${top.map(d=>`${d.ticker}: RS21=${fmtRS(d.rs_p2)} RS63=${fmtRS(d.rs_p3)} | EPS=${fmt(d.eps)} | Stage2=${d.stage2}/9 | VCS=${d.vcs}`).join("\n")}
+日本語200字以内で: 1.最注目銘柄と理由 2.セクター傾向 3.今週の戦略`;
+    try{
+      const res=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,
+          messages:[{role:"user",content:prompt}]})
+      });
+      const j=await res.json();
+      setAnalysis(j.content?.[0]?.text||"分析結果なし");
+    }catch(e){setAnalysis("エラー: "+e.message);}
+    setAiLoad(false);
+  },[rows]);
+
+  const rsCols=[
+    {k:"rs_p1",label:"RS5",  show:showP1,set:setShowP1},
+    {k:"rs_p2",label:"RS21★",show:showP2,set:setShowP2},
+    {k:"rs_p3",label:"RS63", show:showP3,set:setShowP3},
+    {k:"rs_p4",label:"RS126",show:showP4,set:setShowP4},
+    {k:"rs_avg",label:"Avg", show:showAvg,set:setShowAvg},
+  ].filter(c=>c.show);
+
+  const market=RAW_DATA.market;
+  const topN=rows.filter(r=>(r.score??0)>=9).length;
+  const midN=rows.filter(r=>(r.score??0)>=7&&(r.score??0)<9).length;
+  const vcsN=rows.filter(r=>(r.vcs??100)<=40).length;
+
+  const e=React.createElement;
+
+  return e("div",{style:{background:"#060a10",minHeight:"100vh",fontFamily:"monospace",color:"#ddeeff"}},
+    // TOP BAR
+    e("div",{style:{position:"sticky",top:0,zIndex:100,background:"rgba(6,10,16,.97)",
+      borderBottom:"1px solid #0e1c30",padding:"9px 14px",
+      display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}},
+      e("div",{style:{fontFamily:"sans-serif",fontSize:18,fontWeight:800}},
+        "Stock",e("span",{style:{color:"#00e5ff"}},"Screen")),
+      e("div",{style:{fontSize:9,color:"#2a4a6a",lineHeight:1.6}},
+        e("div",{style:{color:"#00e5ff"}},RAW_DATA.updated_jst),
+        e("div",null,`${RAW_DATA.universe_size}銘柄 → ${RAW_DATA.total_found}候補`)),
+      e("input",{value:search,onChange:ev=>setSearch(ev.target.value),
+        placeholder:"Ticker / 銘柄名 / セクター",
+        style:{background:"#0a1320",border:"1px solid #0e1c30",borderRadius:8,
+          padding:"5px 11px",color:"#ddeeff",fontFamily:"monospace",fontSize:12,width:168,outline:"none"}}),
+      e("div",{style:{display:"flex",gap:3,alignItems:"center"}},
+        e("span",{style:{fontSize:9,color:"#2a4a6a"}},"RS:"),
+        ...[["5d",showP1,setShowP1],["21d★",showP2,setShowP2],["63d",showP3,setShowP3],["126d",showP4,setShowP4],["Avg",showAvg,setShowAvg]].map(
+          ([l,v,s])=>e("button",{key:l,onClick:()=>s(x=>!x),style:{
+            background:v?"rgba(0,229,255,.15)":"#0a1320",
+            border:`1px solid ${v?"rgba(0,229,255,.4)":"#0e1c30"}`,
+            borderRadius:6,padding:"3px 8px",color:v?"#00e5ff":"#2a4a6a",
+            fontFamily:"monospace",fontSize:9,
+          }},l)
+        )
+      ),
+      e("button",{onClick:()=>window.location.reload(),
+        style:{background:"#0a1320",border:"1px solid #0e1c30",borderRadius:8,
+          padding:"5px 11px",color:"#4a6a88",fontSize:11}},
+        "🔄 最新に更新"),
+      e("button",{onClick:fetchAI,disabled:aiLoad,style:{
+        marginLeft:"auto",
+        background:aiLoad?"rgba(0,229,255,.1)":"linear-gradient(135deg,#00e5ff,#00ff88)",
+        border:"none",borderRadius:8,padding:"7px 14px",
+        color:aiLoad?"#00e5ff":"#06090f",
+        fontFamily:"sans-serif",fontWeight:800,fontSize:12,
+      }},aiLoad?"分析中...":"⚡ AI分析")
+    ),
+
+    e("div",{style:{display:"flex",maxWidth:1700,margin:"0 auto"}},
+      // SIDEBAR
+      e("div",{style:{width:180,flexShrink:0,padding:"14px 11px",
+        borderRight:"1px solid #0e1c30",display:"flex",flexDirection:"column",gap:14}},
+        e("div",{style:{fontSize:9,color:"#1e3450",letterSpacing:".12em",textTransform:"uppercase"}},"フィルター"),
+        ...[
+          {label:"RS P2 最低", val:minRS,   set:setMinRS,   min:0,  max:99, step:5,  d:v=>`${v}+`},
+          {label:"EPS 最低%",  val:minEPS,  set:setMinEPS,  min:-50,max:200,step:10, d:v=>`${v}%+`},
+          {label:"VCS 最高",   val:maxVCS,  set:setMaxVCS,  min:30, max:100,step:5,  d:v=>`〜${v}`},
+          {label:"Stage2 最低",val:minStage,set:setMinStage,min:0,  max:9,  step:1,  d:v=>`${v}/9+`},
+        ].map(f=>e("div",{key:f.label},
+          e("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:4}},
+            e("span",{style:{fontSize:10,color:"#4a6a88"}},f.label),
+            e("span",{style:{fontSize:10,color:"#00e5ff",fontWeight:700}},f.d(f.val))
+          ),
+          e("input",{type:"range",min:f.min,max:f.max,step:f.step,value:f.val,
+            onChange:ev=>f.set(+ev.target.value)})
+        )),
+        e("button",{onClick:()=>{setMinRS(0);setMinEPS(-999);setMaxVCS(100);setMinStage(0);setSearch("");},
+          style:{background:"none",border:"1px solid #0e1c30",borderRadius:6,
+            color:"#4a6a88",padding:"5px 0",fontSize:11}},
+          "リセット"),
+        market&&e("div",{style:{borderTop:"1px solid #0e1c30",paddingTop:12}},
+          e("div",{style:{fontSize:9,color:"#1e3450",textTransform:"uppercase",marginBottom:8}},"マクロ"),
+          e("div",{style:{fontSize:13,fontWeight:700,color:"#ddeeff",marginBottom:6}},`${market.icon} ${market.mode}`),
+          e("div",{style:{fontSize:11,color:"#f0d060",marginBottom:8}},`VIX: ${market.vix}`),
+          ...Object.entries(market.etfs||{}).map(([etf,d])=>
+            e("div",{key:etf,style:{fontSize:10,color:d.above&&d.rising?"#00e676":"#ff5252",marginBottom:3}},
+              `${d.above&&d.rising?"🟢":"🔴"} ${etf} $${d.close}`))
+        ),
+        e("div",{style:{borderTop:"1px solid #0e1c30",paddingTop:10,fontSize:9,color:"#2a4a6a",lineHeight:2}},
+          e("div",{style:{color:"#4a6a88",marginBottom:4}},"スコア"),
+          "EPS≥25% +2",e("br"),"売上≥15% +2",e("br"),"ROE≥12% +1",e("br"),
+          "RS≥80 +2",e("br"),"VCS≤60 +2",e("br"),"VCS≤40 +1",e("br"),"Stage2≥8 +1"
+        )
+      ),
+
+      // MAIN
+      e("div",{style:{flex:1,padding:"12px 13px",minWidth:0}},
+        // スタッツ
+        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:10}},
+          ...[ {label:"表示銘柄",val:rows.length,col:"#00e5ff"},
+               {label:"◎ 最有力",val:topN,col:"#00ff88"},
+               {label:"○ 有力",val:midN,col:"#7dff9e"},
+               {label:"VCS≤40",val:vcsN,col:"#ff4444"} ].map(s=>
+            e("div",{key:s.label,style:{background:"#0a1320",border:"1px solid #0e1c30",borderRadius:10,padding:"9px 12px"}},
+              e("div",{style:{fontSize:9,color:"#2a4a6a",textTransform:"uppercase",marginBottom:3}},s.label),
+              e("div",{style:{fontSize:22,fontWeight:500,color:s.col,fontFamily:"sans-serif"}},s.val)
+            )
+          )
+        ),
+
+        // AI分析
+        (analysis||aiLoad)&&e("div",{style:{background:"rgba(0,229,255,.04)",border:"1px solid rgba(0,229,255,.2)",
+          borderRadius:12,padding:"12px 16px",marginBottom:10}},
+          e("div",{style:{fontSize:10,color:"#00e5ff",fontWeight:700,marginBottom:6}},"⚡ AI ANALYSIS"),
+          e("div",{style:{fontSize:12,lineHeight:1.9,color:"#8ab0cc",whiteSpace:"pre-wrap"}},
+            aiLoad?"分析中...":analysis)
+        ),
+
+        // 詳細パネル
+        selected&&e("div",{style:{background:"rgba(0,255,140,.04)",border:"1px solid rgba(0,255,140,.18)",
+          borderRadius:12,padding:"12px 16px",marginBottom:10}},
+          e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}},
+            e("div",{style:{display:"flex",alignItems:"center",gap:10}},
+              e("span",{style:{fontFamily:"sans-serif",fontSize:22,fontWeight:800,color:"#00ff88"}},selected.ticker),
+              e("span",{style:{color:"#4a6a88",fontSize:12}},selected.name),
+              e(ScoreBadge,{score:selected.score??0})
+            ),
+            e("button",{onClick:()=>setSelected(null),
+              style:{background:"none",border:"none",color:"#4a6a88",fontSize:16}},"✕")
+          ),
+          e("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}},
+            ...[ {l:"RS P1(5日)",v:fmtRS(selected.rs_p1),col:rsCol(selected.rs_p1??0)},
+                 {l:"RS P2(21日)★",v:fmtRS(selected.rs_p2),col:rsCol(selected.rs_p2??0)},
+                 {l:"RS P3(63日)",v:fmtRS(selected.rs_p3),col:rsCol(selected.rs_p3??0)},
+                 {l:"RS P4(126日)",v:fmtRS(selected.rs_p4),col:rsCol(selected.rs_p4??0)},
+                 {l:"RS Avg",v:fmtRS(selected.rs_avg),col:rsCol(selected.rs_avg??0)},
+                 {l:"EPS成長",v:fmt(selected.eps),col:numCol(selected.eps??0)},
+                 {l:"売上成長",v:fmt(selected.rev),col:numCol(selected.rev??0)},
+                 {l:"ROE",v:`${selected.roe??'—'}%`,col:(selected.roe??0)>=12?"#00e676":"#ff8a80"},
+                 {l:"Stage2",v:`${selected.stage2}/9`,col:(selected.stage2??0)>=8?"#00e5ff":"#f0d060"},
+                 {l:"VCS",v:String(selected.vcs??'—'),col:(selected.vcs??100)<=40?"#ff4444":(selected.vcs??100)<=60?"#00e676":"#f0d060"},
+                 {l:"52W高値比",v:fmt(selected.pct_high),col:numCol(selected.pct_high??0)},
+                 {l:"ADR%",v:selected.adr?`${selected.adr}%`:"—",col:"#ddeeff"},
+                 {l:"損切り",v:`$${selected.stop}`,col:"#ff5252"},
+                 {l:"TP1(+10%)",v:`$${selected.tp1}`,col:"#00ff88"},
+                 {l:"TP2(+20%)",v:`$${selected.tp2}`,col:"#00e5ff"},
+                 {l:"時価総額",v:`$${selected.market_cap_b}B`,col:"#ddeeff"},
+            ].map(m=>e("div",{key:m.l,style:{background:"#0a1320",border:"1px solid #0e1c30",
+              borderRadius:8,padding:"7px 10px",textAlign:"center"}},
+              e("div",{style:{fontSize:9,color:"#2a4a6a",marginBottom:3}},m.l),
+              e("div",{style:{fontSize:13,fontWeight:500,color:m.col}},m.v)
+            ))
+          )
+        ),
+
+        // TABLE
+        e("div",{style:{background:"#0a1320",border:"1px solid #0e1c30",borderRadius:12,overflow:"hidden"}},
+          e("div",{style:{overflowX:"auto"}},
+            e("table",{style:{width:"100%",borderCollapse:"collapse",fontSize:11}},
+              e("thead",null,
+                e("tr",{style:{background:"#060a10",borderBottom:"1px solid #0e1c30"}},
+                  ...[ {k:"rs_p2",label:"RS★",align:"center"},
+                       {k:"t",label:"Ticker",align:"left",noSort:true},
+                       {k:"n",label:"銘柄名",align:"left",noSort:true},
+                       {k:"s",label:"セクター",align:"left",noSort:true} ].map(c=>
+                    e("th",{key:c.k,onClick:()=>!c.noSort&&handleSort(c.k),style:{
+                      padding:"8px 9px",textAlign:c.align||"right",
+                      color:sortK===c.k?"#00e5ff":"#1e3a5a",
+                      fontSize:9,fontWeight:700,textTransform:"uppercase",
+                      letterSpacing:".08em",userSelect:"none",
+                      cursor:c.noSort?"default":"pointer",
+                      background:sortK===c.k?"rgba(0,229,255,.04)":"transparent",
+                    }},c.label,!c.noSort&&sortK===c.k&&(sortD==="desc"?" ↓":" ↑"))
+                  ),
+                  ...rsCols.map(c=>e("th",{key:c.k,onClick:()=>handleSort(c.k),style:{
+                    padding:"8px 9px",textAlign:"right",
+                    color:sortK===c.k?"#00e5ff":"#1e3a5a",
+                    fontSize:9,fontWeight:700,textTransform:"uppercase",
+                    letterSpacing:".08em",userSelect:"none",cursor:"pointer",
+                    background:sortK===c.k?"rgba(0,229,255,.06)":"transparent",
+                    borderBottom:sortK===c.k?"2px solid #00e5ff":"none",
+                  }},c.label,sortK===c.k&&(sortD==="desc"?" ↓":" ↑"))),
+                  ...[ {k:"eps",label:"EPS%"},{k:"rev",label:"売上%"},{k:"roe",label:"ROE%"},
+                       {k:"stage2",label:"Stage2"},{k:"vcs",label:"VCS"},
+                       {k:"pct_high",label:"52W"},{k:"score",label:"Score"} ].map(c=>
+                    e("th",{key:c.k,onClick:()=>handleSort(c.k),style:{
+                      padding:"8px 9px",textAlign:"right",
+                      color:sortK===c.k?"#00e5ff":"#1e3a5a",
+                      fontSize:9,fontWeight:700,textTransform:"uppercase",
+                      letterSpacing:".08em",userSelect:"none",cursor:"pointer",
+                    }},c.label,sortK===c.k&&(sortD==="desc"?" ↓":" ↑"))
+                  ),
+                  e("th",{style:{padding:"8px 9px",fontSize:9,color:"#1e3a5a",textTransform:"uppercase"}},"評価")
+                )
+              ),
+              e("tbody",null,
+                rows.length===0
+                  ? e("tr",null,e("td",{colSpan:20,style:{padding:"40px",textAlign:"center",color:"#2a4a6a"}},"条件に合う銘柄がありません"))
+                  : rows.map(d=>e("tr",{key:d.ticker,className:"row",
+                      onClick:()=>setSelected(d),
+                      style:{background:selected?.ticker===d.ticker?"rgba(0,255,140,0.05)":"transparent"}},
+                    e("td",{style:{...TD,textAlign:"center"}},
+                      e("span",{style:{
+                        display:"inline-block",
+                        background:`${rsCol(d.rs_p2??0)}15`,color:rsCol(d.rs_p2??0),
+                        border:`1px solid ${rsCol(d.rs_p2??0)}35`,
+                        borderRadius:5,padding:"1px 7px",fontSize:12,fontWeight:700,
+                      }},fmtRS(d.rs_p2))
+                    ),
+                    e("td",{style:{...TD,textAlign:"left"}},
+                      e("span",{style:{fontFamily:"sans-serif",fontWeight:800,color:"#00e5ff",fontSize:13}},d.ticker)),
+                    e("td",{style:{...TD,textAlign:"left",color:"#5a7a9a",fontSize:10,maxWidth:140,overflow:"hidden",textOverflow:"ellipsis"}},d.name),
+                    e("td",{style:{...TD,textAlign:"left",color:"#3a5a7a",fontSize:10}},d.sector),
+                    ...rsCols.map(c=>e(RSCell,{key:c.k,val:d[c.k],isSort:sortK===c.k})),
+                    e("td",{style:{...TD,textAlign:"right",color:numCol(d.eps??0),fontWeight:(d.eps??0)>=25?700:400}},fmt(d.eps)),
+                    e("td",{style:{...TD,textAlign:"right",color:numCol(d.rev??0),fontWeight:(d.rev??0)>=15?700:400}},fmt(d.rev)),
+                    e("td",{style:{...TD,textAlign:"right",color:(d.roe??0)>=12?"#00e676":"#ff8a80"}},`${d.roe??'—'}%`),
+                    e("td",{style:{...TD,textAlign:"right",color:(d.stage2??0)>=8?"#00e5ff":(d.stage2??0)>=7?"#f0d060":"#ff8a80"}},`${d.stage2}/9`),
+                    e("td",{style:{...TD,textAlign:"right"}},
+                      e("span",{style:{fontWeight:700,color:(d.vcs??100)<=40?"#ff4444":(d.vcs??100)<=60?"#00e676":(d.vcs??100)<=75?"#f0d060":"#607d8b"}},d.vcs??'—')),
+                    e("td",{style:{...TD,textAlign:"right",color:numCol(d.pct_high??0)}},fmt(d.pct_high)),
+                    e("td",{style:{...TD,textAlign:"right",fontFamily:"sans-serif",fontWeight:700,color:"#ddeeff"}},d.score??0),
+                    e("td",{style:{...TD,textAlign:"center"}},e(ScoreBadge,{score:d.score??0}))
+                  ))
+              )
+            )
+          )
+        ),
+        e("div",{style:{marginTop:8,fontSize:9,color:"#1e3450",display:"flex",justifyContent:"space-between"}},
+          e("span",null,"RS = percentrank(TICKER/SPY, period) | ★P2(21日)ソート | 行クリック→詳細"),
+          e("span",null,`${rows.length}件 / ${RAW_DATA.total_found}候補 / ${RAW_DATA.universe_size}スキャン`)
+        )
+      )
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>
