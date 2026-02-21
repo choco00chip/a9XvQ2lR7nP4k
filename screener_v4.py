@@ -50,13 +50,23 @@ MACRO_TICKERS = ["SPY", "QQQ", "IWM", "^VIX"]
 # ============================================================
 def fetch_sp500():
     try:
-        tables = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
+        headers = {"User-Agent": "Mozilla/5.0"}
+        url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+        resp = requests.get(url, headers=headers, timeout=30)
+        tables = pd.read_html(resp.text)
         tickers = [t.replace(".", "-") for t in tables[0]["Symbol"].tolist()]
         print(f"  S&P500: {len(tickers)}銘柄")
         return tickers
     except Exception as e:
         print(f"  S&P500取得失敗: {e}")
-        return []
+        # フォールバック: 主要銘柄を直接指定
+        return [
+            "AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","AVGO","LLY","JPM",
+            "V","MA","UNH","XOM","PG","HD","COST","MRK","ABBV","CVX","CRM","NFLX",
+            "AMD","NOW","ISRG","GS","TMO","CAT","AMAT","MU","PANW","CRWD","UBER",
+            "ANET","VST","CEG","APP","PLTR","AXON","EME","PWR","DECK","ONON","CAVA",
+            "COIN","SPOT","DDOG","SNOW","TTD","MRVL","KLAC","LRCX","MPWR","FTNT",
+        ]
 
 def fetch_nasdaq100():
     try:
