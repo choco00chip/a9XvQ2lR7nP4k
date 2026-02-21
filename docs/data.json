@@ -1,0 +1,39 @@
+{
+  "updated": "2026-02-21T15:49:11.853270+09:00",
+  "updated_jst": "2026-02-21 15:49 JST",
+  "universe_size": 0,
+  "total_found": 0,
+  "rs_formula": "percentrank(TICKER/SPY daily close, period) — TradingView準拠",
+  "rs_periods": {
+    "p1": 5,
+    "p2": 21,
+    "p3": 63,
+    "p4": 126
+  },
+  "market": {
+    "mode": "ハーフスロットル",
+    "icon": "🟡",
+    "vix": 19.09,
+    "etfs": {
+      "SPY": {
+        "above": true,
+        "rising": false,
+        "close": 689.43,
+        "ema21": 687.63
+      },
+      "QQQ": {
+        "above": false,
+        "rising": false,
+        "close": 608.81,
+        "ema21": 611.19
+      },
+      "IWM": {
+        "above": true,
+        "rising": true,
+        "close": 264.61,
+        "ema21": 262.71
+      }
+    }
+  },
+  "stocks": []
+}
