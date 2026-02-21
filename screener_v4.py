@@ -46,40 +46,114 @@ CONFIG = {
 MACRO_TICKERS = ["SPY", "QQQ", "IWM", "^VIX"]
 
 # ============================================================
-# ユニバース取得
+# ユニバース取得（複数フォールバック付き）
 # ============================================================
+
+# S&P500 完全ハードコードリスト（Wikipediaが取得できない時の最終手段）
+SP500_FALLBACK = [
+    "MMM","AOS","ABT","ABBV","ACN","ADBE","AMD","AES","AFL","A","APD","ABNB","AKAM","ALB","ARE",
+    "ALGN","ALLE","LNT","ALL","GOOGL","GOOG","MO","AMZN","AMCR","AEE","AAL","AEP","AXP","AIG",
+    "AMT","AWK","AMP","AME","AMGN","APH","ADI","ANSS","AON","APA","AAPL","AMAT","APTV","ACGL",
+    "ADM","ANET","AJG","AIZ","T","ATO","ADSK","ADP","AZO","AVB","AVY","AXON","BKR","BALL","BAC",
+    "BK","BBWI","BAX","BDX","BRK-B","BBY","BIO","TECH","BIIB","BLK","BX","BA","BCR","BMY","AVGO",
+    "BR","BRO","BLDR","BF-B","BURL","CHRW","CZR","CPT","CPB","COF","CAH","KMX","CCL","CARR","CTLT",
+    "CAT","CBOE","CBRE","CDW","CE","COR","CNC","CNP","CF","CRL","SCHW","CHTR","CVX","CMG","CB",
+    "CHD","CI","CINF","CTAS","CSCO","C","CFG","CLX","CME","CMS","KO","CTSH","CL","CMCSA","CMA",
+    "CAG","COP","ED","STZ","CEG","COO","CPRT","GLW","CPAY","CTVA","CSGP","COST","CTRA","CCI",
+    "CSX","CMI","CVS","DHR","DRI","DVA","DAY","DECK","DE","DELL","DAL","DVN","DXCM","FANG","DLR",
+    "DFS","DG","DLTR","D","DPZ","DOV","DOW","DHI","DTE","DUK","DD","EMN","ETN","EBAY","ECL","EIX",
+    "EW","EA","ELV","LLY","EMR","ENPH","ETR","EOG","EPAM","EQT","EFX","EQIX","EQR","ESS","EL",
+    "ETSY","EG","EVRST","ES","EXC","EXPE","EXPD","EXR","XOM","FFIV","FDS","FICO","FAST","FRT",
+    "FDX","FIS","FITB","FSLR","FE","FI","FMC","F","FTNT","FTV","FOXA","FOX","BEN","FCX","GRMN",
+    "IT","GE","GEHC","GEN","GPC","GILD","GIS","GM","GPC","GNRC","GD","GS","GWW","HAL","HIG","HAS",
+    "HCA","DOC","HSIC","HSY","HES","HPE","HLT","HOLX","HD","HON","HRL","HST","HWM","HPQ","HUBB",
+    "HUM","HBAN","HII","IBM","IEX","IDXX","ITW","INCY","IR","PODD","INTC","ICE","IFF","IP","IPG",
+    "INTU","ISRG","IVZ","INVH","IQV","IRM","JBHT","JBL","JKHY","J","JNJ","JCI","JPM","JNPR","K",
+    "KVUE","KDP","KEY","KEYS","KMB","KIM","KMI","KLAC","KHC","KR","LHX","LH","LRCX","LW","LVS",
+    "LDOS","LEN","LNC","LIN","LYV","LKQ","LMT","L","LOW","LULU","LYB","MTB","MPC","MKTX","MAR",
+    "MMC","MLM","MAS","MA","MTCH","MKC","MCD","MCK","MDT","MRK","META","MET","MTD","MGM","MCHP",
+    "MU","MSFT","MAA","MRNA","MHK","MOH","TAP","MDLZ","MPWR","MNST","MCO","MS","MOS","MSI","MSCI",
+    "NDAQ","NTAP","NFLX","NWL","NEM","NWSA","NWS","NEE","NKE","NI","NDSN","NSC","NTRS","NOC",
+    "NCLH","NRG","NUE","NVDA","NVR","NXPI","ORLY","OXY","ODFL","OMC","ON","OKE","ORCL","OTIS",
+    "PCAR","PKG","PANW","PH","PAYX","PAYC","PYPL","PNR","PEP","PFE","PCG","PM","PSX","PNW","PXD",
+    "PNC","POOL","PPG","PPL","PFG","PG","PGR","PLD","PRU","PEG","PTC","PSA","PHM","QRVO","PWR",
+    "QCOM","DGX","RL","RJF","RTX","O","REG","REGN","RF","RSG","RMD","RVTY","ROK","ROL","ROP",
+    "ROST","RCL","SPGI","CRM","SBAC","SLB","STX","SRE","NOW","SHW","SPG","SWKS","SJM","SNA",
+    "SOLV","SO","LUV","SWK","SBUX","STT","STLD","STE","SYK","SYF","SNPS","SYY","TMUS","TROW",
+    "TTWO","TPR","TRGP","TGT","TEL","TDY","TFX","TER","TSLA","TXN","TXT","TMO","TJX","TSCO",
+    "TT","TDG","TRV","TRMB","TFC","TYL","TSN","USB","UDR","ULTA","UNP","UAL","UPS","URI","UNH",
+    "UHS","VLO","VTR","VLTO","VRSN","VRSK","VZ","VRTX","VTRS","VICI","V","VST","WAB","WBA","WMT",
+    "DIS","WBD","WM","WAT","WEC","WFC","WELL","WST","WDC","WRK","WY","WHR","WMB","WTW","GWW",
+    "WYNN","XEL","XYL","YUM","ZBRA","ZBH","ZTS",
+    # NASDAQ100追加
+    "ADSK","ALGN","ALXN","ANSS","ASML","ATVI","BIDU","BIIB","CDNS","CERN","CHKP","CHTR","CMCSA",
+    "CPRT","CRWD","CSGP","CTSH","DLTR","DXCM","EA","EBAY","ENPH","EXC","FAST","FISV","GILD",
+    "IDXX","ILMN","INCY","INTC","INTU","ISRG","JD","KDP","KLAC","LCID","LRCX","LULU","MAR",
+    "MELI","MNST","MRNA","MSFT","MU","NFLX","NTES","NVDA","NXPI","OKTA","ORLY","PANW","PAYX",
+    "PCAR","PDD","PYPL","QCOM","REGN","ROST","SBUX","SGEN","SIRI","SNPS","SPLK","TCOM","TEAM",
+    "TMUS","TSLA","TXN","VRSK","VRSN","VRTX","WBA","WDAY","XEL","ZM","ZS","ABNB","DDOG","HOOD",
+    "LCID","RIVN","SNOW","UBER","COIN","PLTR","APP","TTD","AXON","CAVA","ONON","EME",
+]
+
+import requests as req_lib
+
 def fetch_sp500():
+    """S&P500銘柄リスト取得（3段階フォールバック）"""
+
+    # 方法1: requests + User-Agent偽装
     try:
-        headers = {"User-Agent": "Mozilla/5.0"}
-        url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-        resp = requests.get(url, headers=headers, timeout=30)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            "Accept": "text/html,application/xhtml+xml",
+        }
+        resp = req_lib.get(
+            "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
+            headers=headers, timeout=30
+        )
         tables = pd.read_html(resp.text)
         tickers = [t.replace(".", "-") for t in tables[0]["Symbol"].tolist()]
-        print(f"  S&P500: {len(tickers)}銘柄")
-        return tickers
+        if len(tickers) > 400:
+            print(f"  S&P500 (Wikipedia): {len(tickers)}銘柄")
+            return tickers
     except Exception as e:
-        print(f"  S&P500取得失敗: {e}")
-        # フォールバック: 主要銘柄を直接指定
-        return [
-            "AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","AVGO","LLY","JPM",
-            "V","MA","UNH","XOM","PG","HD","COST","MRK","ABBV","CVX","CRM","NFLX",
-            "AMD","NOW","ISRG","GS","TMO","CAT","AMAT","MU","PANW","CRWD","UBER",
-            "ANET","VST","CEG","APP","PLTR","AXON","EME","PWR","DECK","ONON","CAVA",
-            "COIN","SPOT","DDOG","SNOW","TTD","MRVL","KLAC","LRCX","MPWR","FTNT",
-        ]
+        print(f"  Wikipedia方法1失敗: {e}")
+
+    # 方法2: pandas直接
+    try:
+        tables = pd.read_html(
+            "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
+            storage_options={"User-Agent": "Mozilla/5.0"}
+        )
+        tickers = [t.replace(".", "-") for t in tables[0]["Symbol"].tolist()]
+        if len(tickers) > 400:
+            print(f"  S&P500 (pandas): {len(tickers)}銘柄")
+            return tickers
+    except Exception as e:
+        print(f"  Wikipedia方法2失敗: {e}")
+
+    # 方法3: ハードコードリスト（最終手段）
+    tickers = list(set(SP500_FALLBACK))
+    print(f"  S&P500 (ハードコード): {len(tickers)}銘柄")
+    return tickers
 
 def fetch_nasdaq100():
+    """NASDAQ100銘柄リスト取得"""
     try:
-        tables = pd.read_html("https://en.wikipedia.org/wiki/Nasdaq-100")
+        headers = {"User-Agent": "Mozilla/5.0"}
+        resp = req_lib.get(
+            "https://en.wikipedia.org/wiki/Nasdaq-100",
+            headers=headers, timeout=30
+        )
+        tables = pd.read_html(resp.text)
         for t in tables:
             if "Ticker" in t.columns:
                 tickers = t["Ticker"].dropna().tolist()
-                print(f"  NASDAQ100: {len(tickers)}銘柄")
-                return tickers
-        return []
+                if len(tickers) > 50:
+                    print(f"  NASDAQ100: {len(tickers)}銘柄")
+                    return tickers
     except Exception as e:
         print(f"  NASDAQ100取得失敗: {e}")
-        return []
+    return []
 
 def build_universe(mode="full"):
     tickers = set()
