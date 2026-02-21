@@ -465,16 +465,13 @@ def save_json(candidates, market, universe_size):
 # HTML アプリ生成（docs/index.html）
 # data.jsonと同一ドメインなのでCORSなし・完全自動
 # ============================================================
-def save_html():
-    """docs/index.html を生成（data.jsonをfetchする方式）"""
-    html = open("docs/index.html", "w", encoding="utf-8") if False else None
-    # index.htmlはリポジトリに静的ファイルとして存在する
-    # data.jsonと同一ドメインなのでCORSなし
+def save_html(json_data=None):
+    """docs/index.html は静的ファイルとして管理"""
     index_path = Path("docs") / "index.html"
     if index_path.exists():
-        print(f"  → docs/index.html は既存のファイルを使用")
+        print(f"  -> docs/index.html は既存のファイルを使用")
     else:
-        print(f"  ⚠️ docs/index.html が見つかりません。GitHubに直接追加してください。")
+        print(f"  docs/index.html が見つかりません")
 
 # ============================================================
 def main():
