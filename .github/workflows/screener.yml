@@ -2,8 +2,8 @@ name: Daily Stock Screening
 
 on:
   schedule:
-    - cron: '0 22 * * 1-5'   # 毎日 07:00 JST（月〜金）
-    - cron: '0 20 1 * *'      # 毎月1日 05:00 JST（ティッカーリスト更新）
+    - cron: '0 22 * * 1-5'   # 毎日 07:00 JST（月〜金）スクリーニング
+    - cron: '0 20 1 * *'      # 毎月1日 05:00 JST ティッカー更新
   workflow_dispatch:
     inputs:
       update_tickers:
@@ -18,15 +18,14 @@ permissions:
 
 jobs:
   # ============================================================
-  # Job 1: Russell 2000ティッカーリスト更新（月次）
+  # Job 1: Russell 2000ティッカーリスト更新（月次 or 手動）
   # ============================================================
   update_tickers:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # 毎月1日 OR 手動で update_tickers=true の場合のみ実行
     if: |
-      github.event_name == 'schedule' && contains(github.event.schedule, '0 20 1') ||
-      github.event_name == 'workflow_dispatch' && github.event.inputs.update_tickers == 'true'
+      (github.event_name == 'schedule' && contains(github.event.schedule, '0 20 1')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.update_tickers == 'true')
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -41,26 +40,31 @@ jobs:
           git config user.email "bot@github.com"
           git config user.name "Screener Bot"
           git add russell2000.txt
-          git diff --staged --quiet || git commit -m "📋 Russell 2000ティッカーリスト更新 $(date +'%Y-%m')"
-          git push
+          git diff --staged --quiet || (
+            git commit -m "📋 Russell 2000ティッカーリスト更新 $(date +'%Y-%m')" &&
+            git pull --rebase origin main &&
+            git push
+          )
 
   # ============================================================
   # Job 2: 毎日のスクリーニング
+  # update_tickersが実行された場合は必ずその後に実行（直列化）
   # ============================================================
   screen:
     runs-on: ubuntu-latest
     timeout-minutes: 300
-    # update_tickersが実行された場合はその後に実行（依存関係）
-    # 通常の平日スケジュールでは単独実行
-    needs: []
+    needs: [update_tickers]
     if: |
       always() &&
-      (github.event_name == 'schedule' && contains(github.event.schedule, '0 22') ||
-       github.event_name == 'workflow_dispatch')
+      (needs.update_tickers.result == 'success' || needs.update_tickers.result == 'skipped') &&
+      (
+        (github.event_name == 'schedule' && contains(github.event.schedule, '0 22')) ||
+        (github.event_name == 'schedule' && contains(github.event.schedule, '0 20 1')) ||
+        github.event_name == 'workflow_dispatch'
+      )
     steps:
       - uses: actions/checkout@v4
         with:
-          # update_tickersがrussell2000.txtを更新した場合も取得
           ref: main
       - uses: actions/setup-python@v5
         with:
@@ -71,9 +75,9 @@ jobs:
         run: |
           if [ -f russell2000.txt ]; then
             COUNT=$(wc -l < russell2000.txt)
-            echo "russell2000.txt: ${COUNT}銘柄"
+            echo "✅ russell2000.txt: ${COUNT}銘柄"
           else
-            echo "russell2000.txt: なし（初回はupdate_tickersを先に実行してください）"
+            echo "⚠️  russell2000.txt なし → ハードコードフォールバックで動作"
           fi
       - name: スクリーニング実行
         run: python screener_v4.py --mode full
@@ -82,8 +86,11 @@ jobs:
           git config user.email "bot@github.com"
           git config user.name "Screener Bot"
           git add docs/
-          git diff --staged --quiet || git commit -m "📊 スクリーニング更新 $(date +'%Y-%m-%d')"
-          git push
+          git diff --staged --quiet || (
+            git commit -m "📊 スクリーニング更新 $(date +'%Y-%m-%d')" &&
+            git pull --rebase origin main &&
+            git push
+          )
 
   # ============================================================
   # Job 3: GitHub Pages デプロイ
