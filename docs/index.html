@@ -3,272 +3,222 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Dashboard</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<title>StockScreen</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#060a10;color:#ddeeff;font-family:monospace;min-height:100vh}
-::-webkit-scrollbar{width:3px;height:3px}
-::-webkit-scrollbar-thumb{background:#1a2840;border-radius:2px}
-.row:hover{background:rgba(0,180,255,0.06)!important;cursor:pointer}
-input[type=range]{accent-color:#00e5ff;cursor:pointer;width:100%}
-button{cursor:pointer}
+body{background:#060a10;color:#ddeeff;font-family:monospace;font-size:12px}
+#app{min-height:100vh}
+.topbar{position:sticky;top:0;z-index:100;background:#060a10;border-bottom:1px solid #0e1c30;padding:8px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-family:sans-serif;font-size:18px;font-weight:800}
+.logo span{color:#00e5ff}
+.meta{font-size:9px;color:#2a4a6a;line-height:1.6}
+.meta .time{color:#00e5ff}
+.search{background:#0a1320;border:1px solid #0e1c30;border-radius:8px;padding:5px 10px;color:#ddeeff;font-family:monospace;font-size:12px;width:130px;outline:none}
+.btn{background:#0a1320;border:1px solid #0e1c30;border-radius:6px;padding:4px 9px;color:#4a6a88;font-size:11px;cursor:pointer}
+.btn:hover{border-color:#00e5ff;color:#00e5ff}
+.layout{display:flex;max-width:1800px;margin:0 auto}
+.sidebar{width:170px;flex-shrink:0;padding:12px 10px;border-right:1px solid #0e1c30;display:flex;flex-direction:column;gap:12px}
+.sidebar-title{font-size:9px;color:#1e3450;text-transform:uppercase;letter-spacing:.1em}
+.filter-row{display:flex;justify-content:space-between;margin-bottom:3px}
+.filter-label{font-size:10px;color:#4a6a88}
+.filter-val{font-size:10px;color:#00e5ff;font-weight:700}
+input[type=range]{width:100%;accent-color:#00e5ff;cursor:pointer}
+.reset-btn{background:none;border:1px solid #0e1c30;border-radius:6px;color:#4a6a88;padding:4px 0;font-size:11px;cursor:pointer;width:100%}
+.macro{border-top:1px solid #0e1c30;padding-top:10px}
+.macro-mode{font-size:12px;font-weight:700;color:#ddeeff;margin-bottom:4px}
+.macro-vix{font-size:11px;color:#f0d060;margin-bottom:6px}
+.macro-etf{font-size:10px;margin-bottom:3px}
+.score-legend{border-top:1px solid #0e1c30;padding-top:8px;font-size:9px;color:#2a4a6a;line-height:2.0}
+.score-legend .leg-title{color:#4a6a88;margin-bottom:2px}
+.main{flex:1;padding:10px 12px;min-width:0}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.card{background:#0a1320;border:1px solid #0e1c30;border-radius:10px;padding:8px 12px}
+.card-label{font-size:9px;color:#2a4a6a;text-transform:uppercase;margin-bottom:2px}
+.card-val{font-size:22px;font-weight:500;font-family:sans-serif}
+.detail{background:rgba(0,255,140,.04);border:1px solid rgba(0,255,140,.18);border-radius:12px;padding:12px 16px;margin-bottom:10px}
+.detail-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.detail-ticker{font-family:sans-serif;font-size:22px;font-weight:800;color:#00ff88;margin-right:8px}
+.detail-close{background:none;border:none;color:#4a6a88;font-size:16px;cursor:pointer}
+.detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.detail-cell{background:#0a1320;border:1px solid #0e1c30;border-radius:8px;padding:6px 10px;text-align:center}
+.detail-cell-label{font-size:9px;color:#2a4a6a;margin-bottom:2px}
+.detail-cell-val{font-size:13px;font-weight:500}
+.tbl-wrap{background:#0a1320;border:1px solid #0e1c30;border-radius:12px;overflow:hidden}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead tr{background:#060a10;border-bottom:1px solid #0e1c30}
+th{padding:7px 8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#1e3a5a;cursor:pointer;user-select:none;white-space:nowrap;text-align:right}
+th.left{text-align:left}
+th.active{color:#00e5ff;background:rgba(0,229,255,.05);border-bottom:2px solid #00e5ff}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:rgba(0,180,255,.06)}
+tbody tr.sel{background:rgba(0,255,140,.05)}
+td{padding:6px 8px;border-bottom:1px solid rgba(14,28,48,.6);white-space:nowrap;text-align:right}
+td.left{text-align:left}
+.rs-badge{display:inline-block;border-radius:5px;padding:1px 7px;font-size:12px;font-weight:700}
+.score-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700}
+.footer{margin-top:6px;font-size:9px;color:#1e3450;display:flex;justify-content:space-between}
+.center-msg{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px}
 </style>
 </head>
 <body>
-<div id="root"></div>
+<div id="app"><div class="center-msg"><div style="color:#00e5ff;font-size:14px">読み込み中...</div></div></div>
 <script>
-const e = React.createElement;
-const {useState, useMemo, useEffect, useCallback} = React;
+function rsCol(v){return v>=90?"#00ff88":v>=80?"#7dff9e":v>=70?"#f0d060":v>=55?"#ff9933":"#ff4444";}
+function numCol(v){return v>5?"#00e676":v>0?"#69f0ae":v<-5?"#ff5252":v<0?"#ff8a80":"#607d8b";}
+function vcsCol(v){return v>=80?"#00ff88":v>=60?"#00e676":v>=40?"#2962ff":"#607d8b";}
+function fmtRS(v){return v==null?"—":Number(v).toFixed(1);}
+function fmtNum(v){return v==null?"—":(v>0?"+":"")+Number(v).toFixed(1)+"%";}
+function fmtP(v){return v==null?"—":(v>0?"+":"")+Number(v).toFixed(1)+"%";}
+function scoreLabel(s){return s>=8?{t:"◎ 最有力",c:"#00ff88"}:s>=6?{t:"○ 有力",c:"#7dff9e"}:s>=4?{t:"△ 候補",c:"#f0d060"}:{t:"✕",c:"#4a6a88"};}
+function badge(s){var d=scoreLabel(s);return '<span class="score-badge" style="background:'+d.c+'18;color:'+d.c+';border:1px solid '+d.c+'40">'+d.t+'</span>';}
 
-const rsCol = v => v>=90?"#00ff88":v>=80?"#7dff9e":v>=70?"#f0d060":v>=55?"#ff9933":"#ff4444";
-const numCol = v => v>5?"#00e676":v>0?"#69f0ae":v<-5?"#ff5252":v<0?"#ff8a80":"#607d8b";
-const fmt = (v,d=1) => v==null?"—":`${v>0?"+":""}${Number(v).toFixed(d)}%`;
-const fmtRS = v => v==null?"—":Number(v).toFixed(1);
-const TD = {padding:"7px 9px",borderBottom:"1px solid rgba(14,28,48,.6)",whiteSpace:"nowrap"};
+var DATA=null;
+var state={sortK:"rs_p2",sortD:"desc",search:"",minRS:0,minVCS:0,minStage:0,selected:null,showP1:false,showP2:true,showP3:true,showP4:true,showAvg:true};
 
-const SCORE_DEF = [
-  {min:8, label:"◎ 最有力", col:"#00ff88"},
-  {min:6, label:"○ 有力",   col:"#7dff9e"},
-  {min:4, label:"△ 候補",   col:"#f0d060"},
-  {min:0, label:"✕",        col:"#4a6a88"},
-];
+fetch("./data.json?t="+Date.now())
+  .then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
+  .then(function(d){DATA=d;render();})
+  .catch(function(err){document.getElementById("app").innerHTML='<div class="center-msg"><div style="font-size:36px">⚠️</div><div style="color:#ff5252">取得失敗: '+err.message+'</div><button class="btn" onclick="location.reload()">再試行</button></div>';});
 
-function ScoreBadge({score}) {
-  const d = SCORE_DEF.find(x => score >= x.min) || SCORE_DEF[3];
-  return e("span", {style:{
-    fontSize:10, padding:"2px 7px", borderRadius:4, fontWeight:700,
-    background:`${d.col}18`, color:d.col, border:`1px solid ${d.col}40`
-  }}, d.label);
-}
-
-function RSCell({val, isSort}) {
-  if (val == null) return e("td", {style:{...TD, textAlign:"right", color:"#2a4a6a"}}, "—");
-  const col = rsCol(val);
-  return e("td", {style:{...TD, textAlign:"right"}},
-    e("span", {style:{
-      color:col, fontWeight:val>=80?700:400,
-      background:isSort?`${col}14`:"transparent",
-      borderRadius:3, padding:isSort?"1px 5px":0
-    }}, fmtRS(val))
-  );
-}
-
-function StatCard({label, val, col}) {
-  return e("div", {style:{background:"#0a1320",border:"1px solid #0e1c30",borderRadius:10,padding:"9px 12px"}},
-    e("div", {style:{fontSize:9,color:"#2a4a6a",textTransform:"uppercase",marginBottom:3}}, label),
-    e("div", {style:{fontSize:22,fontWeight:500,color:col,fontFamily:"sans-serif"}}, val)
-  );
-}
-
-function App() {
-  const [rawData, setRawData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(null);
-  const [sortK, setSortK]     = useState("rs_p2");
-  const [sortD, setSortD]     = useState("desc");
-  const [search, setSearch]   = useState("");
-  const [minRS, setMinRS]     = useState(0);
-  const [minVCS, setMinVCS]   = useState(0);
-  const [minStage, setMinStage] = useState(0);
-  const [selected, setSelected] = useState(null);
-  const [showP1, setShowP1]   = useState(false);
-  const [showP2, setShowP2]   = useState(true);
-  const [showP3, setShowP3]   = useState(true);
-  const [showP4, setShowP4]   = useState(true);
-  const [showAvg, setShowAvg] = useState(true);
-
-  useEffect(() => {
-    fetch("./data.json?t=" + Date.now())
-      .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-      .then(d => { setRawData(d); setLoading(false); })
-      .catch(err => { setError(err.message); setLoading(false); });
-  }, []);
-
-  const rows = useMemo(() => {
-    if (!rawData) return [];
-    return (rawData.stocks || []).filter(s => {
-      if (search) { const q = search.toUpperCase(); if (!s.ticker?.includes(q)) return false; }
-      if ((s.rs_p2 ?? 0) < minRS)     return false;
-      if ((s.vcs ?? 0) < minVCS)      return false;
-      if ((s.stage2 ?? 0) < minStage) return false;
-      return true;
-    }).sort((a, b) => {
-      const av = a[sortK] ?? -999, bv = b[sortK] ?? -999;
-      return sortD === "desc" ? bv - av : av - bv;
-    });
-  }, [rawData, search, sortK, sortD, minRS, minVCS, minStage]);
-
-  const handleSort = useCallback(k => {
-    if (k === sortK) setSortD(d => d === "desc" ? "asc" : "desc");
-    else { setSortK(k); setSortD("desc"); }
-  }, [sortK]);
-
-  const rsCols = [
-    {k:"rs_p1", label:"RS5",   show:showP1, set:setShowP1},
-    {k:"rs_p2", label:"RS21★", show:showP2, set:setShowP2},
-    {k:"rs_p3", label:"RS63",  show:showP3, set:setShowP3},
-    {k:"rs_p4", label:"RS126", show:showP4, set:setShowP4},
-    {k:"rs_avg",label:"Avg",   show:showAvg,set:setShowAvg},
-  ].filter(c => c.show);
-
-  if (loading) return e("div", {style:{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh"}},
-    e("div", {style:{color:"#00e5ff",fontSize:16}}, "データ読み込み中...")
-  );
-
-  if (error) return e("div", {style:{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",flexDirection:"column",gap:12}},
-    e("div", {style:{fontSize:40}}, "⚠️"),
-    e("div", {style:{color:"#ff5252",fontSize:14}}, "取得失敗: " + error),
-    e("button", {onClick:()=>window.location.reload(), style:{marginTop:8,background:"#0a1320",border:"1px solid #0e1c30",borderRadius:8,padding:"8px 20px",color:"#4a6a88",fontSize:12}}, "再試行")
-  );
-
-  const market = rawData.market;
-  const topN   = rows.filter(r => (r.score??0) >= 8).length;
-  const midN   = rows.filter(r => (r.score??0) >= 6 && (r.score??0) < 8).length;
-  const vcsN   = rows.filter(r => (r.vcs??0) >= 80).length;
-
-  const thStyle = (k, align) => ({
-    padding:"8px 9px", textAlign:align||"right",
-    color:sortK===k?"#00e5ff":"#1e3a5a",
-    fontSize:9, fontWeight:700, textTransform:"uppercase",
-    letterSpacing:".08em", userSelect:"none", cursor:"pointer",
-    background:sortK===k?"rgba(0,229,255,.06)":"transparent",
-    borderBottom:sortK===k?"2px solid #00e5ff":"none",
+function getRows(){
+  if(!DATA)return[];
+  var rows=(DATA.stocks||[]).filter(function(s){
+    if(state.search&&s.ticker.indexOf(state.search.toUpperCase())<0)return false;
+    if((s.rs_p2||0)<state.minRS)return false;
+    if((s.vcs||0)<state.minVCS)return false;
+    if((s.stage2||0)<state.minStage)return false;
+    return true;
   });
-
-  return e("div", {style:{background:"#060a10",minHeight:"100vh",fontFamily:"monospace",color:"#ddeeff"}},
-
-    e("div", {style:{position:"sticky",top:0,zIndex:100,background:"rgba(6,10,16,.97)",borderBottom:"1px solid #0e1c30",padding:"9px 14px",display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}},
-      e("div", {style:{fontFamily:"sans-serif",fontSize:18,fontWeight:800}},
-        "Stock", e("span", {style:{color:"#00e5ff"}}, "Screen")),
-      e("div", {style:{fontSize:9,color:"#2a4a6a",lineHeight:1.6}},
-        e("div", {style:{color:"#00e5ff"}}, rawData.updated_jst),
-        e("div", null, `${rawData.universe_size}銘柄 → ${rawData.total_found}候補`)),
-      e("input", {value:search, onChange:ev=>setSearch(ev.target.value), placeholder:"Ticker検索",
-        style:{background:"#0a1320",border:"1px solid #0e1c30",borderRadius:8,padding:"5px 11px",color:"#ddeeff",fontFamily:"monospace",fontSize:12,width:140,outline:"none"}}),
-      e("div", {style:{display:"flex",gap:3,alignItems:"center"}},
-        e("span", {style:{fontSize:9,color:"#2a4a6a"}}, "RS:"),
-        ...[[" 5d",showP1,setShowP1],["21d★",showP2,setShowP2],["63d",showP3,setShowP3],["126d",showP4,setShowP4],["Avg",showAvg,setShowAvg]].map(
-          ([l,v,s]) => e("button", {key:l, onClick:()=>s(x=>!x), style:{
-            background:v?"rgba(0,229,255,.15)":"#0a1320",
-            border:`1px solid ${v?"rgba(0,229,255,.4)":"#0e1c30"}`,
-            borderRadius:6, padding:"3px 8px", color:v?"#00e5ff":"#2a4a6a", fontFamily:"monospace", fontSize:9
-          }}, l))),
-      e("button", {onClick:()=>window.location.reload(), style:{background:"#0a1320",border:"1px solid #0e1c30",borderRadius:8,padding:"5px 11px",color:"#4a6a88",fontSize:11}}, "🔄 更新")),
-
-    e("div", {style:{display:"flex",maxWidth:1800,margin:"0 auto"}},
-
-      e("div", {style:{width:175,flexShrink:0,padding:"14px 11px",borderRight:"1px solid #0e1c30",display:"flex",flexDirection:"column",gap:14}},
-        e("div", {style:{fontSize:9,color:"#1e3450",letterSpacing:".12em",textTransform:"uppercase"}}, "フィルター"),
-        ...[
-          {label:"RS P2 最低",  val:minRS,    set:setMinRS,    min:0, max:99, step:5, d:v=>`${v}+`},
-          {label:"VCS 最低",    val:minVCS,   set:setMinVCS,   min:0, max:90, step:5, d:v=>`${v}+`},
-          {label:"Stage2 最低", val:minStage, set:setMinStage, min:0, max:9,  step:1, d:v=>`${v}/9+`},
-        ].map(f => e("div", {key:f.label},
-          e("div", {style:{display:"flex",justifyContent:"space-between",marginBottom:4}},
-            e("span", {style:{fontSize:10,color:"#4a6a88"}}, f.label),
-            e("span", {style:{fontSize:10,color:"#00e5ff",fontWeight:700}}, f.d(f.val))),
-          e("input", {type:"range",min:f.min,max:f.max,step:f.step,value:f.val,onChange:ev=>f.set(+ev.target.value)}))),
-        e("button", {onClick:()=>{setMinRS(0);setMinVCS(0);setMinStage(0);setSearch("");},
-          style:{background:"none",border:"1px solid #0e1c30",borderRadius:6,color:"#4a6a88",padding:"5px 0",fontSize:11}}, "リセット"),
-        market && e("div", {style:{borderTop:"1px solid #0e1c30",paddingTop:12}},
-          e("div", {style:{fontSize:9,color:"#1e3450",textTransform:"uppercase",marginBottom:8}}, "マクロ"),
-          e("div", {style:{fontSize:13,fontWeight:700,color:"#ddeeff",marginBottom:6}}, `${market.icon} ${market.mode}`),
-          e("div", {style:{fontSize:11,color:"#f0d060",marginBottom:8}}, `VIX: ${market.vix}`),
-          ...Object.entries(market.etfs||{}).map(([etf,d]) =>
-            e("div", {key:etf, style:{fontSize:10,color:d.above&&d.rising?"#00e676":"#ff5252",marginBottom:3}},
-              `${d.above&&d.rising?"🟢":"🔴"} ${etf} $${d.close}`))),
-        e("div", {style:{borderTop:"1px solid #0e1c30",paddingTop:10,fontSize:9,color:"#2a4a6a",lineHeight:2}},
-          e("div", {style:{color:"#4a6a88",marginBottom:4}}, "スコア（最大10）"),
-          "RS≥90 +3 / ≥70 +2 / ≥50 +1", e("br"),
-          "VCS≥80 +3 / ≥60 +1", e("br"),
-          "Stage2=9 +2 / ≥7 +1", e("br"),
-          "52W-10%以内 +1")),
-
-      e("div", {style:{flex:1,padding:"12px 13px",minWidth:0}},
-        e("div", {style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:10}},
-          e(StatCard, {label:"表示銘柄", val:rows.length, col:"#00e5ff"}),
-          e(StatCard, {label:"◎ 最有力", val:topN,        col:"#00ff88"}),
-          e(StatCard, {label:"○ 有力",   val:midN,        col:"#7dff9e"}),
-          e(StatCard, {label:"VCS≥80",  val:vcsN,         col:"#00ff88"})),
-
-        selected && e("div", {style:{background:"rgba(0,255,140,.04)",border:"1px solid rgba(0,255,140,.18)",borderRadius:12,padding:"12px 16px",marginBottom:10}},
-          e("div", {style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}},
-            e("div", {style:{display:"flex",alignItems:"center",gap:10}},
-              e("span", {style:{fontFamily:"sans-serif",fontSize:22,fontWeight:800,color:"#00ff88"}}, selected.ticker),
-              e(ScoreBadge, {score:selected.score??0})),
-            e("button", {onClick:()=>setSelected(null), style:{background:"none",border:"none",color:"#4a6a88",fontSize:16}}, "✕")),
-          e("div", {style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}},
-            ...[
-              {l:"RS P1(5日)",   v:fmtRS(selected.rs_p1),  col:rsCol(selected.rs_p1??0)},
-              {l:"RS P2(21日)★", v:fmtRS(selected.rs_p2),  col:rsCol(selected.rs_p2??0)},
-              {l:"RS P3(63日)",  v:fmtRS(selected.rs_p3),  col:rsCol(selected.rs_p3??0)},
-              {l:"RS P4(126日)", v:fmtRS(selected.rs_p4),  col:rsCol(selected.rs_p4??0)},
-              {l:"RS Avg",       v:fmtRS(selected.rs_avg), col:rsCol(selected.rs_avg??0)},
-              {l:"1Mリターン",   v:fmt(selected.m1),        col:numCol(selected.m1??0)},
-              {l:"3Mリターン",   v:fmt(selected.m3),        col:numCol(selected.m3??0)},
-              {l:"6Mリターン",   v:fmt(selected.m6),        col:numCol(selected.m6??0)},
-              {l:"Stage2",  v:`${selected.stage2}/9`,       col:(selected.stage2??0)>=8?"#00e5ff":"#f0d060"},
-              {l:"VCS",     v:String(selected.vcs??"—"),    col:(selected.vcs??0)>=80?"#00ff88":(selected.vcs??0)>=60?"#00e676":"#f0d060"},
-              {l:"52W高値比", v:fmt(selected.pct_high),     col:numCol(selected.pct_high??0)},
-              {l:"ADR%",    v:selected.adr?`${selected.adr}%`:"—", col:"#ddeeff"},
-              {l:"株価",    v:`$${selected.close}`,          col:"#ddeeff"},
-              {l:"損切り",  v:`$${selected.stop}`,           col:"#ff5252"},
-              {l:"TP1(+10%)", v:`$${selected.tp1}`,         col:"#00ff88"},
-              {l:"TP2(+20%)", v:`$${selected.tp2}`,         col:"#00e5ff"},
-            ].map(m => e("div", {key:m.l, style:{background:"#0a1320",border:"1px solid #0e1c30",borderRadius:8,padding:"7px 10px",textAlign:"center"}},
-              e("div", {style:{fontSize:9,color:"#2a4a6a",marginBottom:3}}, m.l),
-              e("div", {style:{fontSize:13,fontWeight:500,color:m.col}}, m.v))))),
-
-        e("div", {style:{background:"#0a1320",border:"1px solid #0e1c30",borderRadius:12,overflow:"hidden"}},
-          e("div", {style:{overflowX:"auto"}},
-            e("table", {style:{width:"100%",borderCollapse:"collapse",fontSize:11}},
-              e("thead", null,
-                e("tr", {style:{background:"#060a10",borderBottom:"1px solid #0e1c30"}},
-                  e("th", {onClick:()=>handleSort("rs_p2"), style:{...thStyle("rs_p2","center")}},
-                    "RS★", sortK==="rs_p2"&&(sortD==="desc"?" ↓":" ↑")),
-                  e("th", {style:{padding:"8px 9px",textAlign:"left",color:"#1e3a5a",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".08em"}}, "Ticker"),
-                  ...rsCols.map(c => e("th", {key:c.k, onClick:()=>handleSort(c.k), style:thStyle(c.k)},
-                    c.label, sortK===c.k&&(sortD==="desc"?" ↓":" ↑"))),
-                  ...[
-                    {k:"m1",label:"1M%"},{k:"m3",label:"3M%"},{k:"m6",label:"6M%"},
-                    {k:"stage2",label:"Stage2"},{k:"vcs",label:"VCS"},
-                    {k:"pct_high",label:"52W"},{k:"adr",label:"ADR%"},
-                    {k:"close",label:"Price"},{k:"score",label:"Score"},
-                  ].map(c => e("th", {key:c.k, onClick:()=>handleSort(c.k), style:thStyle(c.k)},
-                    c.label, sortK===c.k&&(sortD==="desc"?" ↓":" ↑"))),
-                  e("th", {style:{padding:"8px 9px",fontSize:9,color:"#1e3a5a",textTransform:"uppercase"}}, "評価"))),
-              e("tbody", null,
-                rows.length === 0
-                  ? e("tr", null, e("td", {colSpan:20, style:{padding:"40px",textAlign:"center",color:"#2a4a6a"}}, "条件に合う銘柄がありません"))
-                  : rows.map(d => e("tr", {key:d.ticker, className:"row", onClick:()=>setSelected(d),
-                      style:{background:selected?.ticker===d.ticker?"rgba(0,255,140,0.05)":"transparent"}},
-                    e("td", {style:{...TD,textAlign:"center"}},
-                      e("span", {style:{display:"inline-block",background:`${rsCol(d.rs_p2??0)}15`,
-                        color:rsCol(d.rs_p2??0),border:`1px solid ${rsCol(d.rs_p2??0)}35`,
-                        borderRadius:5,padding:"1px 7px",fontSize:12,fontWeight:700}}, fmtRS(d.rs_p2))),
-                    e("td", {style:{...TD,textAlign:"left"}},
-                      e("span", {style:{fontFamily:"sans-serif",fontWeight:800,color:"#00e5ff",fontSize:13}}, d.ticker)),
-                    ...rsCols.map(c => e(RSCell, {key:c.k, val:d[c.k], isSort:sortK===c.k})),
-                    e("td", {style:{...TD,textAlign:"right",color:numCol(d.m1??0)}},  fmt(d.m1)),
-                    e("td", {style:{...TD,textAlign:"right",color:numCol(d.m3??0)}},  fmt(d.m3)),
-                    e("td", {style:{...TD,textAlign:"right",color:numCol(d.m6??0)}},  fmt(d.m6)),
-                    e("td", {style:{...TD,textAlign:"right",color:(d.stage2??0)>=8?"#00e5ff":(d.stage2??0)>=7?"#f0d060":"#ff8a80"}}, `${d.stage2}/9`),
-                    e("td", {style:{...TD,textAlign:"right"}},
-                      e("span", {style:{fontWeight:700,color:(d.vcs??0)>=80?"#00ff88":(d.vcs??0)>=60?"#00e676":(d.vcs??0)>=40?"#2962ff":"#607d8b"}},
-                        d.vcs??"—")),
-                    e("td", {style:{...TD,textAlign:"right",color:numCol(d.pct_high??0)}}, fmt(d.pct_high)),
-                    e("td", {style:{...TD,textAlign:"right",color:"#607d8b"}}, d.adr?`${d.adr}%`:"—"),
-                    e("td", {style:{...TD,textAlign:"right",color:"#ddeeff",fontWeight:500}}, `$${d.close}`),
-                    e("td", {style:{...TD,textAlign:"right",fontFamily:"sans-serif",fontWeight:700,color:"#ddeeff"}}, d.score??0),
-                    e("td", {style:{...TD,textAlign:"center"}}, e(ScoreBadge, {score:d.score??0}))))))),
-        e("div", {style:{marginTop:8,fontSize:9,color:"#1e3450",display:"flex",justifyContent:"space-between"}},
-          e("span", null, "RS=percentrank(TICKER/SPY,period) | ★P2(21日)ソート | 行クリック→詳細"),
-          e("span", null, `${rows.length}件 / ${rawData.total_found}候補 / ${rawData.universe_size}スキャン`)))));
+  var k=state.sortK,d=state.sortD;
+  rows.sort(function(a,b){var av=a[k]!=null?a[k]:-999,bv=b[k]!=null?b[k]:-999;return d==="desc"?bv-av:av-bv;});
+  return rows;
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(e(App));
+function getRSCols(){
+  var cols=[];
+  if(state.showP1)cols.push({k:"rs_p1",l:"RS5"});
+  if(state.showP2)cols.push({k:"rs_p2",l:"RS21★"});
+  if(state.showP3)cols.push({k:"rs_p3",l:"RS63"});
+  if(state.showP4)cols.push({k:"rs_p4",l:"RS126"});
+  if(state.showAvg)cols.push({k:"rs_avg",l:"Avg"});
+  return cols;
+}
+
+function th(k,label,cls){
+  var active=state.sortK===k;
+  var arrow=active?(state.sortD==="desc"?" ↓":" ↑"):"";
+  return '<th class="'+(cls||"")+(active?" active":"")+'" onclick="sort(\''+k+'\')">'+label+arrow+'</th>';
+}
+
+function render(){
+  if(!DATA)return;
+  var rows=getRows(),rsCols=getRSCols(),market=DATA.market||{};
+  var topN=rows.filter(function(r){return(r.score||0)>=8;}).length;
+  var midN=rows.filter(function(r){return(r.score||0)>=6&&(r.score||0)<8;}).length;
+  var vcsN=rows.filter(function(r){return(r.vcs||0)>=80;}).length;
+  var html='';
+
+  html+='<div class="topbar">';
+  html+='<div class="logo">Stock<span>Screen</span></div>';
+  html+='<div class="meta"><div class="time">'+(DATA.updated_jst||"")+'</div><div>'+DATA.universe_size+'銘柄 → '+DATA.total_found+'候補</div></div>';
+  html+='<input class="search" type="text" placeholder="Ticker検索" value="'+state.search+'" oninput="onSearch(this.value)"/>';
+  html+='<div style="display:flex;gap:3px;align-items:center"><span style="font-size:9px;color:#2a4a6a">RS:</span>';
+  [["showP1"," 5d"],["showP2","21d★"],["showP3","63d"],["showP4","126d"],["showAvg","Avg"]].forEach(function(x){
+    var on=state[x[0]];
+    html+='<button style="background:'+(on?"rgba(0,229,255,.15)":"#0a1320")+';border:1px solid '+(on?"rgba(0,229,255,.4)":"#0e1c30")+';border-radius:6px;padding:3px 7px;color:'+(on?"#00e5ff":"#2a4a6a")+';font-size:9px;cursor:pointer" onclick="toggle(\''+x[0]+'\')">'+x[1]+'</button>';
+  });
+  html+='</div><button class="btn" onclick="location.reload()">🔄 更新</button></div>';
+
+  html+='<div class="layout"><div class="sidebar">';
+  html+='<div class="sidebar-title">フィルター</div>';
+  [{l:"RS P2 最低",k:"minRS",v:state.minRS,min:0,max:99,step:5,f:function(v){return v+"+";}},
+   {l:"VCS 最低",k:"minVCS",v:state.minVCS,min:0,max:90,step:5,f:function(v){return v+"+";}},
+   {l:"Stage2 最低",k:"minStage",v:state.minStage,min:0,max:9,step:1,f:function(v){return v+"/9+";}}
+  ].forEach(function(f){
+    html+='<div><div class="filter-row"><span class="filter-label">'+f.l+'</span><span class="filter-val">'+f.f(f.v)+'</span></div>';
+    html+='<input type="range" min="'+f.min+'" max="'+f.max+'" step="'+f.step+'" value="'+f.v+'" oninput="setFilter(\''+f.k+'\',+this.value)"/></div>';
+  });
+  html+='<button class="reset-btn" onclick="resetFilters()">リセット</button>';
+  if(market.mode){
+    html+='<div class="macro"><div class="macro-mode">'+(market.icon||"")+" "+market.mode+'</div>';
+    html+='<div class="macro-vix">VIX: '+market.vix+'</div>';
+    Object.keys(market.etfs||{}).forEach(function(etf){var d=market.etfs[etf];var ok=d.above&&d.rising;html+='<div class="macro-etf" style="color:'+(ok?"#00e676":"#ff5252")+'">'+(ok?"🟢":"🔴")+" "+etf+" $"+d.close+'</div>';});
+    html+='</div>';
+  }
+  html+='<div class="score-legend"><div class="leg-title">スコア（最大10）</div>RS≥90 +3 / ≥70 +2 / ≥50 +1<br>VCS≥80 +3 / ≥60 +1<br>Stage2=9 +2 / ≥7 +1<br>52W-10%以内 +1</div>';
+  html+='</div>';
+
+  html+='<div class="main"><div class="cards">';
+  [[rows.length,"表示銘柄","#00e5ff"],[topN,"◎ 最有力","#00ff88"],[midN,"○ 有力","#7dff9e"],[vcsN,"VCS≥80","#00ff88"]].forEach(function(x){
+    html+='<div class="card"><div class="card-label">'+x[1]+'</div><div class="card-val" style="color:'+x[2]+'">'+x[0]+'</div></div>';
+  });
+  html+='</div>';
+
+  if(state.selected){
+    var s=state.selected;
+    html+='<div class="detail"><div class="detail-head"><div><span class="detail-ticker">'+s.ticker+'</span>'+badge(s.score||0)+'</div><button class="detail-close" onclick="closeDetail()">✕</button></div>';
+    html+='<div class="detail-grid">';
+    [["RS P1(5日)",fmtRS(s.rs_p1),rsCol(s.rs_p1||0)],["RS P2(21日)★",fmtRS(s.rs_p2),rsCol(s.rs_p2||0)],
+     ["RS P3(63日)",fmtRS(s.rs_p3),rsCol(s.rs_p3||0)],["RS P4(126日)",fmtRS(s.rs_p4),rsCol(s.rs_p4||0)],
+     ["RS Avg",fmtRS(s.rs_avg),rsCol(s.rs_avg||0)],["1Mリターン",fmtNum(s.m1),numCol(s.m1||0)],
+     ["3Mリターン",fmtNum(s.m3),numCol(s.m3||0)],["6Mリターン",fmtNum(s.m6),numCol(s.m6||0)],
+     ["Stage2",(s.stage2||0)+"/9",(s.stage2||0)>=8?"#00e5ff":"#f0d060"],
+     ["VCS",s.vcs!=null?s.vcs:"—",vcsCol(s.vcs||0)],["52W高値比",fmtP(s.pct_high),numCol(s.pct_high||0)],
+     ["ADR%",s.adr?s.adr+"%":"—","#ddeeff"],["株価","$"+(s.close||0),"#ddeeff"],
+     ["損切り","$"+(s.stop||0),"#ff5252"],["TP1(+10%)","$"+(s.tp1||0),"#00ff88"],["TP2(+20%)","$"+(s.tp2||0),"#00e5ff"]
+    ].forEach(function(c){html+='<div class="detail-cell"><div class="detail-cell-label">'+c[0]+'</div><div class="detail-cell-val" style="color:'+c[2]+'">'+c[1]+'</div></div>';});
+    html+='</div></div>';
+  }
+
+  html+='<div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr>';
+  html+=th("rs_p2","RS★","");
+  html+='<th class="left">Ticker</th>';
+  rsCols.forEach(function(c){html+=th(c.k,c.l);});
+  [["m1","1M%"],["m3","3M%"],["m6","6M%"],["stage2","Stage2"],["vcs","VCS"],["pct_high","52W"],["adr","ADR%"],["close","Price"],["score","Score"]].forEach(function(c){html+=th(c[0],c[1]);});
+  html+='<th>評価</th></tr></thead><tbody>';
+
+  if(rows.length===0){
+    html+='<tr><td colspan="20" style="text-align:center;padding:40px;color:#2a4a6a">条件に合う銘柄がありません</td></tr>';
+  }else{
+    rows.forEach(function(d){
+      var isSel=state.selected&&state.selected.ticker===d.ticker;
+      html+='<tr class="'+(isSel?"sel":"")+'" onclick="selectRow(\''+d.ticker+'\')">';
+      var rc=rsCol(d.rs_p2||0);
+      html+='<td style="text-align:center"><span class="rs-badge" style="background:'+rc+'15;color:'+rc+';border:1px solid '+rc+'35">'+fmtRS(d.rs_p2)+'</span></td>';
+      html+='<td class="left"><span style="font-family:sans-serif;font-weight:800;color:#00e5ff;font-size:13px">'+d.ticker+'</span></td>';
+      rsCols.forEach(function(c){
+        var v=d[c.k];
+        if(v==null){html+='<td style="color:#2a4a6a">—</td>';return;}
+        var col=rsCol(v),isSort=state.sortK===c.k;
+        html+='<td><span style="color:'+col+';font-weight:'+(v>=80?700:400)+';background:'+(isSort?col+'14':"transparent")+';border-radius:3px;padding:'+(isSort?"1px 5px":0)+'">'+fmtRS(v)+'</span></td>';
+      });
+      html+='<td style="color:'+numCol(d.m1||0)+'">'+fmtNum(d.m1)+'</td>';
+      html+='<td style="color:'+numCol(d.m3||0)+'">'+fmtNum(d.m3)+'</td>';
+      html+='<td style="color:'+numCol(d.m6||0)+'">'+fmtNum(d.m6)+'</td>';
+      var s2=d.stage2||0;
+      html+='<td style="color:'+(s2>=8?"#00e5ff":s2>=7?"#f0d060":"#ff8a80")+'">'+s2+'/9</td>';
+      html+='<td><span style="font-weight:700;color:'+vcsCol(d.vcs||0)+'">'+(d.vcs!=null?d.vcs:"—")+'</span></td>';
+      html+='<td style="color:'+numCol(d.pct_high||0)+'">'+fmtP(d.pct_high)+'</td>';
+      html+='<td style="color:#607d8b">'+(d.adr?d.adr+"%":"—")+'</td>';
+      html+='<td style="color:#ddeeff;font-weight:500">$'+(d.close||0)+'</td>';
+      html+='<td style="font-family:sans-serif;font-weight:700;color:#ddeeff">'+(d.score||0)+'</td>';
+      html+='<td>'+badge(d.score||0)+'</td></tr>';
+    });
+  }
+  html+='</tbody></table></div></div>';
+  html+='<div class="footer"><span>RS=percentrank(TICKER/SPY,period) | 行クリック→詳細</span><span>'+rows.length+'件 / '+DATA.total_found+'候補 / '+DATA.universe_size+'スキャン</span></div>';
+  html+='</div></div>';
+  document.getElementById("app").innerHTML=html;
+}
+
+function sort(k){if(state.sortK===k)state.sortD=state.sortD==="desc"?"asc":"desc";else{state.sortK=k;state.sortD="desc";}render();}
+function onSearch(v){state.search=v;render();}
+function setFilter(k,v){state[k]=v;render();}
+function resetFilters(){state.search="";state.minRS=0;state.minVCS=0;state.minStage=0;render();}
+function toggle(k){state[k]=!state[k];render();}
+function selectRow(ticker){var rows=getRows();var found=null;for(var i=0;i<rows.length;i++){if(rows[i].ticker===ticker){found=rows[i];break;}}state.selected=(state.selected&&state.selected.ticker===ticker)?null:found;render();}
+function closeDetail(){state.selected=null;render();}
 </script>
 </body>
 </html>
