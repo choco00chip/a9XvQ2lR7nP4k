@@ -14,11 +14,11 @@ yf.download()の価格データのみでスクリーニングする。
   RS_P2 ≥ 90  → +3
   RS_P2 ≥ 70  → +2（≥90未満）
   RS_P2 ≥ 50  → +1（≥70未満）
-  VCS ≤ 40    → +3
-  VCS ≤ 60    → +1（≤40未満）
+  VCS ≥ 80    → +3
+  VCS ≥ 60    → +1（≥80未満）
   Stage2 = 9  → +2
   Stage2 ≥ 7  → +1（9未満）
-  52W高値-10%以内 → +1
+  EMA≤3%以内  → +1
 
 出力: docs/data.json
 """
@@ -52,6 +52,8 @@ CONFIG = {
     "vcs_best":        80,      # VCS ベスト（≥80で高圧縮）
     "high_52w_pct_max": 35,     # 52週高値からの乖離率上限(%)
     "price_min":       10.0,    # 株価下限（ドル）
+    "ema_low_max":     8.0,     # 21EMA Low% 上限（%）
+    "atr_sma50_max":   7.0,     # ATR%50SMA 上限
     "vix_full":        20,
     "vix_half":        25,
     "stop_loss_pct":   7.0,
@@ -188,15 +190,15 @@ def fetch_russell2000():
 
 def build_universe(mode="full"):
     tickers = set()
-    if mode in ["full", "sp500"]:    tickers.update(fetch_sp500())
-    if mode in ["full", "nasdaq"]:   tickers.update(fetch_nasdaq100())
+    if mode in ["full", "sp500"]:       tickers.update(fetch_sp500())
+    if mode in ["full", "nasdaq"]:      tickers.update(fetch_nasdaq100())
     if mode in ["full", "russell2000"]: tickers.update(fetch_russell2000())
     exclude = {"SPY","QQQ","IWM","DIA","RSP","GLD","SLV","TLT","HYG","VXX",
                "IEMG","EFA","AGG","BND","VEA","VWO","IEFA","ITOT","IVV","VOO"}
     tickers -= exclude
     tickers = {t for t in tickers if len(t) <= 5 and t.replace("-","").isalpha()}
     result = list(tickers)
-    random.shuffle(result)   # アルファベット偏り防止
+    random.shuffle(result)
     print(f"  ユニバース合計: {len(result)}銘柄")
     return result
 
@@ -284,21 +286,20 @@ def calc_stage2(df) -> dict | None:
         ]
         h52 = float(c.tail(252).max())
         return {
-            "score":        sum(conds),
-            "close":        round(cl, 2),
+            "score":         sum(conds),
+            "close":         round(cl, 2),
             "pct_from_high": round((cl - h52) / h52 * 100, 1),
-            "ema21":        round(v21, 2),
-            "sma50":        round(v50, 2),
+            "ema21":         round(v21, 2),
+            "sma50":         round(v50, 2),
         }
     except Exception:
         return None
 
 # ============================================================
-# VCS (Volatility Contraction Score)
+# VCS (Volatility Contraction Score) — Pine Script完全再現
 # ============================================================
 def calc_vcs(df) -> dict:
     """
-    VCS (Volatility Contraction Score) — Pine Script完全再現
     高スコア(≥80)=良い、低スコア=ルーズ
     """
     try:
@@ -313,41 +314,33 @@ def calc_vcs(df) -> dict:
         sensitivity=2.0; bonusMax=15
         penaltyFactor=0.75; trendPenaltyWeight=1.0; hlLookback=63
 
-        # ATR比較
         tr = pd.concat([(h-l),(h-c.shift(1)).abs(),(l-c.shift(1)).abs()],axis=1).max(axis=1)
         trShort  = tr.rolling(lenShort).mean()
         trLong   = tr.rolling(lenLong).mean()
         ratioATR = trShort / trLong.clip(lower=1e-6)
-        # STDEV比較
         stdShort = c.rolling(lenShort).std()
         stdLong  = c.rolling(lenLong).std()
         ratioStd = stdShort / stdLong.clip(lower=1e-6)
-        # Volume収縮
         volAvg      = v.rolling(lenVol).mean()
         volShortAvg = v.rolling(5).mean()
         volRatio    = volShortAvg / volAvg.clip(lower=1.0)
-        # Efficiencyフィルター（トレンドペナルティ）
         netChange   = (c - c.shift(lenShort)).abs()
         totalTravel = tr.rolling(lenShort).sum()
         efficiency  = netChange / totalTravel.clip(lower=1e-6)
         trendFactor = (1.0 - efficiency * trendPenaltyWeight).clip(lower=0.0)
-        # スコア合成
         s_atr = (1.0-ratioATR).clip(lower=0.0)*sensitivity
         s_std = (1.0-ratioStd).clip(lower=0.0)*sensitivity
         s_vol = (1.0-volRatio).clip(lower=0.0)
         rawScore     = s_atr*0.4 + s_std*0.4 + s_vol*0.2
         physicsScore = (rawScore * trendFactor * 100).clip(upper=100)
         smoothPhysics= physicsScore.ewm(span=3, adjust=False).mean()
-        # HigherLow構造チェック
         lowRecent   = l.rolling(lenShort).min()
         lowBase     = l.shift(lenShort).rolling(hlLookback).min()
         isHigherLow = lowRecent >= lowBase.fillna(0)
-        # Consistencyボーナス
         isTight   = smoothPhysics >= 70
         groups    = (isTight != isTight.shift()).cumsum()
         daysTight = isTight.groupby(groups).cumcount().where(isTight,0) + isTight.astype(int)
         daysTight = daysTight.where(isTight, 0)
-        # 最終スコア
         totalScore = smoothPhysics*0.85 + daysTight.clip(upper=bonusMax)
         finalScore = totalScore.where(isHigherLow, totalScore*penaltyFactor).fillna(0.0)
 
@@ -365,7 +358,6 @@ def calc_adr(df, period=20) -> float | None:
         return None
 
 def calc_momentum(df) -> dict:
-    """1M/3M/6Mリターン（価格データから計算）"""
     try:
         c = df["Close"].squeeze().dropna()
         def ret(days):
@@ -414,7 +406,8 @@ def run_screening(price_data: dict, spy_df) -> list:
     cnt = {
         "total": len(universe_tickers),
         "price_filter": 0, "rs_fail": 0,
-        "stage2_fail": 0, "high_fail": 0, "pass": 0
+        "stage2_fail": 0, "high_fail": 0,
+        "ema_fail": 0, "atr_fail": 0, "pass": 0
     }
 
     for ticker in universe_tickers:
@@ -442,6 +435,28 @@ def run_screening(price_data: dict, spy_df) -> list:
                 cnt["high_fail"] += 1
                 continue
 
+            # ─ 21EMA Low% ≤ 8% ─
+            # (close - EMA21) / EMA21 × 100
+            c_s   = df["Close"].squeeze()
+            ema21_val = float(c_s.ewm(span=21, adjust=False).mean().iloc[-1])
+            cl    = float(c_s.iloc[-1])
+            ema_low_pct = round((cl - ema21_val) / ema21_val * 100, 2)
+            if ema_low_pct < 0 or ema_low_pct > CONFIG["ema_low_max"]:
+                cnt["ema_fail"] += 1
+                continue
+
+            # ─ ATR%50SMA ≤ 7 ─
+            # (close - SMA50) × 100 / ATR14
+            h_s   = df["High"].squeeze()
+            l_s   = df["Low"].squeeze()
+            tr    = pd.concat([(h_s-l_s),(h_s-c_s.shift(1)).abs(),(l_s-c_s.shift(1)).abs()],axis=1).max(axis=1)
+            atr14 = float(tr.rolling(14).mean().iloc[-1])
+            sma50_val = float(c_s.rolling(50).mean().iloc[-1])
+            atr_sma50 = round((cl - sma50_val) * 100 / atr14, 2) if atr14 > 0 else 999
+            if atr_sma50 < 0 or atr_sma50 > CONFIG["atr_sma50_max"]:
+                cnt["atr_fail"] += 1
+                continue
+
             # ─ VCS / ADR / Momentum ─
             vcs  = calc_vcs(df)
             adr  = calc_adr(df)
@@ -453,46 +468,45 @@ def run_screening(price_data: dict, spy_df) -> list:
             if rs_p2 >= 90:   sc += 3
             elif rs_p2 >= 70: sc += 2
             elif rs_p2 >= 50: sc += 1
-            if vcs["score"] >= CONFIG["vcs_best"]:   sc += 3   # ≥80: 高圧縮
-            elif vcs["score"] >= CONFIG["vcs_entry"]: sc += 1  # ≥60: 収縮中
+            if vcs["score"] >= CONFIG["vcs_best"]:    sc += 3   # ≥80: 高圧縮
+            elif vcs["score"] >= CONFIG["vcs_entry"]: sc += 1   # ≥60: 収縮中
             if s2["score"] == 9:   sc += 2
             elif s2["score"] >= 7: sc += 1
-            if abs(s2["pct_from_high"]) <= 10: sc += 1  # 52W高値-10%以内
+            if ema_low_pct <= 3:   sc += 1  # EMA超タイト(3%以内)
 
             cnt["pass"] += 1
             candidates.append({
-                "ticker":   ticker,
-                "name":     ticker,   # ファンダなしのためtickerで代替
-                "sector":   "—",
-                "industry": "—",
-                "market_cap_b": None,
-                "close":    s2["close"],
-                "pct_high": s2["pct_from_high"],
-                "stage2":   s2["score"],
-                "ema21":    s2["ema21"],
-                "sma50":    s2["sma50"],
-                "rs_p1":    rs.get("p1"),
-                "rs_p2":    rs.get("p2"),
-                "rs_p3":    rs.get("p3"),
-                "rs_p4":    rs.get("p4"),
-                "rs_avg":   rs.get("avg"),
-                "m1":       mom["m1"],
-                "m3":       mom["m3"],
-                "m6":       mom["m6"],
-                "vcs":      vcs["score"],
-                "vol_shrink": vcs["vol_shrink"],
-                "adr":      adr,
-                "score":    sc,
-                "stop":     round(s2["close"] * (1 - CONFIG["stop_loss_pct"]/100), 2),
-                "tp1":      round(s2["close"] * 1.10, 2),
-                "tp2":      round(s2["close"] * 1.20, 2),
+                "ticker":      ticker,
+                "close":       s2["close"],
+                "pct_high":    s2["pct_from_high"],
+                "stage2":      s2["score"],
+                "ema21":       s2["ema21"],
+                "sma50":       s2["sma50"],
+                "ema_low_pct": ema_low_pct,
+                "atr_sma50":   atr_sma50,
+                "rs_p1":       rs.get("p1"),
+                "rs_p2":       rs.get("p2"),
+                "rs_p3":       rs.get("p3"),
+                "rs_p4":       rs.get("p4"),
+                "rs_avg":      rs.get("avg"),
+                "m1":          mom["m1"],
+                "m3":          mom["m3"],
+                "m6":          mom["m6"],
+                "vcs":         vcs["score"],
+                "vol_shrink":  vcs["vol_shrink"],
+                "adr":         adr,
+                "score":       sc,
+                "stop":        round(s2["close"] * (1 - CONFIG["stop_loss_pct"]/100), 2),
+                "tp1":         round(s2["close"] * 1.10, 2),
+                "tp2":         round(s2["close"] * 1.20, 2),
             })
         except Exception:
             pass
 
     print(f"  [診断] 合計:{cnt['total']} | $10未満:{cnt['price_filter']} | "
           f"RS<50:{cnt['rs_fail']} | Stage2<5:{cnt['stage2_fail']} | "
-          f"52W超:{cnt['high_fail']} | 通過:{cnt['pass']}")
+          f"52W超:{cnt['high_fail']} | EMA>{CONFIG['ema_low_max']}%:{cnt['ema_fail']} | "
+          f"ATR_SMA50>{CONFIG['atr_sma50_max']}:{cnt['atr_fail']} | 通過:{cnt['pass']}")
 
     return sorted(candidates, key=lambda x: (x["score"], x["rs_p2"] or 0), reverse=True)
 
