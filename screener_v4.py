@@ -14,11 +14,11 @@ yf.download()の価格データのみでスクリーニングする。
   RS_P2 ≥ 90  → +3
   RS_P2 ≥ 70  → +2（≥90未満）
   RS_P2 ≥ 50  → +1（≥70未満）
-  VCS ≥ 80    → +3
-  VCS ≥ 60    → +1（≥80未満）
+  VCS ≤ 40    → +3
+  VCS ≤ 60    → +1（≤40未満）
   Stage2 = 9  → +2
   Stage2 ≥ 7  → +1（9未満）
-  EMA≤3%以内  → +1
+  52W高値-10%以内 → +1
 
 出力: docs/data.json
 """
@@ -52,7 +52,6 @@ CONFIG = {
     "vcs_best":        80,      # VCS ベスト（≥80で高圧縮）
     "high_52w_pct_max": 35,     # 52週高値からの乖離率上限(%)
     "price_min":       10.0,    # 株価下限（ドル）
-    "atr_sma50_max":   7.0,     # ATR%50SMA 上限
     "vix_full":        20,
     "vix_half":        25,
     "stop_loss_pct":   7.0,
@@ -189,15 +188,15 @@ def fetch_russell2000():
 
 def build_universe(mode="full"):
     tickers = set()
-    if mode in ["full", "sp500"]:       tickers.update(fetch_sp500())
-    if mode in ["full", "nasdaq"]:      tickers.update(fetch_nasdaq100())
+    if mode in ["full", "sp500"]:    tickers.update(fetch_sp500())
+    if mode in ["full", "nasdaq"]:   tickers.update(fetch_nasdaq100())
     if mode in ["full", "russell2000"]: tickers.update(fetch_russell2000())
     exclude = {"SPY","QQQ","IWM","DIA","RSP","GLD","SLV","TLT","HYG","VXX",
                "IEMG","EFA","AGG","BND","VEA","VWO","IEFA","ITOT","IVV","VOO"}
     tickers -= exclude
     tickers = {t for t in tickers if len(t) <= 5 and t.replace("-","").isalpha()}
     result = list(tickers)
-    random.shuffle(result)
+    random.shuffle(result)   # アルファベット偏り防止
     print(f"  ユニバース合計: {len(result)}銘柄")
     return result
 
@@ -285,20 +284,21 @@ def calc_stage2(df) -> dict | None:
         ]
         h52 = float(c.tail(252).max())
         return {
-            "score":         sum(conds),
-            "close":         round(cl, 2),
+            "score":        sum(conds),
+            "close":        round(cl, 2),
             "pct_from_high": round((cl - h52) / h52 * 100, 1),
-            "ema21":         round(v21, 2),
-            "sma50":         round(v50, 2),
+            "ema21":        round(v21, 2),
+            "sma50":        round(v50, 2),
         }
     except Exception:
         return None
 
 # ============================================================
-# VCS (Volatility Contraction Score) — Pine Script完全再現
+# VCS (Volatility Contraction Score)
 # ============================================================
 def calc_vcs(df) -> dict:
     """
+    VCS (Volatility Contraction Score) — Pine Script完全再現
     高スコア(≥80)=良い、低スコア=ルーズ
     """
     try:
@@ -313,33 +313,41 @@ def calc_vcs(df) -> dict:
         sensitivity=2.0; bonusMax=15
         penaltyFactor=0.75; trendPenaltyWeight=1.0; hlLookback=63
 
+        # ATR比較
         tr = pd.concat([(h-l),(h-c.shift(1)).abs(),(l-c.shift(1)).abs()],axis=1).max(axis=1)
         trShort  = tr.rolling(lenShort).mean()
         trLong   = tr.rolling(lenLong).mean()
         ratioATR = trShort / trLong.clip(lower=1e-6)
+        # STDEV比較
         stdShort = c.rolling(lenShort).std()
         stdLong  = c.rolling(lenLong).std()
         ratioStd = stdShort / stdLong.clip(lower=1e-6)
+        # Volume収縮
         volAvg      = v.rolling(lenVol).mean()
         volShortAvg = v.rolling(5).mean()
         volRatio    = volShortAvg / volAvg.clip(lower=1.0)
+        # Efficiencyフィルター（トレンドペナルティ）
         netChange   = (c - c.shift(lenShort)).abs()
         totalTravel = tr.rolling(lenShort).sum()
         efficiency  = netChange / totalTravel.clip(lower=1e-6)
         trendFactor = (1.0 - efficiency * trendPenaltyWeight).clip(lower=0.0)
+        # スコア合成
         s_atr = (1.0-ratioATR).clip(lower=0.0)*sensitivity
         s_std = (1.0-ratioStd).clip(lower=0.0)*sensitivity
         s_vol = (1.0-volRatio).clip(lower=0.0)
         rawScore     = s_atr*0.4 + s_std*0.4 + s_vol*0.2
         physicsScore = (rawScore * trendFactor * 100).clip(upper=100)
         smoothPhysics= physicsScore.ewm(span=3, adjust=False).mean()
+        # HigherLow構造チェック
         lowRecent   = l.rolling(lenShort).min()
         lowBase     = l.shift(lenShort).rolling(hlLookback).min()
         isHigherLow = lowRecent >= lowBase.fillna(0)
+        # Consistencyボーナス
         isTight   = smoothPhysics >= 70
         groups    = (isTight != isTight.shift()).cumsum()
         daysTight = isTight.groupby(groups).cumcount().where(isTight,0) + isTight.astype(int)
         daysTight = daysTight.where(isTight, 0)
+        # 最終スコア
         totalScore = smoothPhysics*0.85 + daysTight.clip(upper=bonusMax)
         finalScore = totalScore.where(isHigherLow, totalScore*penaltyFactor).fillna(0.0)
 
@@ -357,6 +365,7 @@ def calc_adr(df, period=20) -> float | None:
         return None
 
 def calc_momentum(df) -> dict:
+    """1M/3M/6Mリターン（価格データから計算）"""
     try:
         c = df["Close"].squeeze().dropna()
         def ret(days):
