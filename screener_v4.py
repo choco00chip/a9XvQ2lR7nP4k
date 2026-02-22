@@ -42,6 +42,7 @@ CONFIG = {
     "max_workers":       6,
     "batch_size":        50,
     "price_period":      "1y",
+    "price_min":        10.0,   # 株価10ドル未満を除外
     "max_output":        100,
 }
 
@@ -431,6 +432,11 @@ def run_screening(price_data, funda_data, spy_df) -> list:
             df = price_data[ticker]
             f  = funda_data.get(ticker)
             if f is None:
+                continue
+
+            # ─ 株価フィルター ─
+            current_price = float(df["Close"].iloc[-1])
+            if current_price < CONFIG["price_min"]:
                 continue
 
             # ─ RS（実計算）─
